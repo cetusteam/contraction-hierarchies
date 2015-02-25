@@ -1,0 +1,157 @@
+<html>
+<head>
+<title>Highway Hierarchies Input Format for Directed Graphs</title>
+</head>
+<body>
+<h2>Highway Hierarchies Input Format for Directed Graphs</h2>
+Dominik Schultes, mail@dominik-schultes.de, Universit&auml;t Karlsruhe
+(TH), July 2006
+<hr>
+usual file suffix: <b>.ddsg</b><br><br>
+<b>File Format:</b>
+<ul>
+<li>a <i>text</i>-file, whitespace-separated;
+<li>starts with single letter 'd';
+<li>followed by the number of nodes <i>n</i> and the number of edges <i>m</i>
+<li>for each of the <i>m</i> edges, we have
+<ul>
+<li>source node ID <i>s</i>, an unsigned 32-bit integer, 0 &lt;= <i>s</i> &lt; <i>n</i>;
+<li>target node ID <i>t</i>, an unsigned 32-bit integer, 0 &lt;= <i>t</i> &lt; <i>n</i>;
+<li>edge weight <i>w</i>, an unsigned 32-bit integer; note that the length of
+the longest shortest path must fit into a 32-bit integer
+<li>the direction <i>d<i>:
+<ul>
+<li>0 = open in both directions
+<li>1 = open only in forward direction (from <i>s</i> to <i>t</i>)
+<li>2 = open only in backward direction (from <i>t</i> to <i>s</i>)
+<li>3 = closed
+</ul>
+Note that specifying an edge (s,t,w,1) is equivalent to specifying an
+edge (t,s,w,2). It does not matter which form is used. In the current
+implementation, 3 is interpreted as 0, i.e., closed roads are used in
+both directions. If you really want to completely close a road, just
+leave it away.
+</ul>
+</ul>
+<hr>
+<h3>Example: Luxembourg</h3>
+<code>
+d<br>
+30732 38250<br>
+1 0 634 0<br>
+2 0 271 0<br>
+3 4 24 0<br>
+5 3 70 0<br>
+6 7 130 0<br>
+8 9 166 0<br>
+10 11 364 0<br>
+12 9 58 0<br>
+13 14 54 0<br>
+13 12 104 0<br>
+15 9 126 0<br>
+15 8 104 0<br>
+16 17 1055 0<br>
+16 21180 724 0<br>
+18 16 13 0<br>
+19 8 173 0<br>
+20 6 214 0<br>
+21 22 443 0<br>
+21 20 137 0<br>
+23 13 119 0<br>
+23 12 137 0<br>
+24 19 50 0<br>
+25 24 137 0<br>
+26 24 115 0<br>
+26 25 119 0<br>
+27 23 191 0<br>
+27 15 256 0<br>
+28 25 58 0<br>
+29 19 349 0<br>
+30 21 220 0<br>
+30 20 301 0<br>
+31 18 178 0<br>
+32 30 142 0<br>
+32 6 292 0<br>
+33 28 493 0<br>
+34 26 400 0<br>
+35 30 135 0<br>
+35 32 35 0<br>
+36 28 439 0<br>
+37 36 101 0<br>
+38 29 378 0<br>
+39 40 2873 0<br>
+39 31 80 0<br>
+37 34 457 0<br>
+41 27 655 0<br>
+42 29 504 0<br>
+42 41 119 0<br>
+43 36 342 0<br>
+44 21231 77 0<br>
+45 46 205 0<br>
+47 45 20 0<br>
+48 10 236 0<br>
+48 41 295 0<br>
+49 42 292 0<br>
+50 51 239 0<br>
+52 35 227 0<br>
+53 50 139 0<br>
+53 47 169 0<br>
+54 31 868 0<br>
+55 52 81 0<br>
+55 56 63 0<br>
+57 47 157 0<br>
+58 57 40 0<br>
+58 44 79 0<br>
+59 53 124 0<br>
+60 50 158 0<br>
+61 55 106 0<br>
+62 59 92 0<br>
+63 48 93 0<br>
+64 63 227 0<br>
+65 59 74 0<br>
+66 67 29 0<br>
+68 63 16 0<br>
+68 66 35 0<br>
+69 57 155 0<br>
+70 65 250 0<br>
+70 71 83 0<br>
+72 61 439 0<br>
+72 73 1354 0<br>
+74 75 54 2<br>
+76 75 58 0<br>
+76 74 14 0<br>
+77 78 194 0<br>
+79 66 247 0<br>
+80 68 216 0<br>
+81 82 103 0<br>
+83 80 7 0<br>
+84 83 30 0<br>
+85 74 246 0<br>
+85 84 220 3<br>
+86 85 52 0<br>
+86 84 50 0<br>
+87 85 121 0<br>
+88 86 61 0<br>
+89 74 189 0<br>
+90 81 385 1<br>
+90 76 186 0<br>
+90 91 158 0<br>
+</code>
+<br>
+38142 lines have been omitted.<br>
+<br>
+<code>
+30673 30230 1559 0<br>
+25268 30673 59 0<br>
+25111 25086 525 0<br>
+25235 30149 64 0<br>
+24925 24913 32 0<br>
+29427 26958 47 0<br>
+29391 27137 82 0<br>
+27095 26959 499 0<br>
+27119 30082 1598 0<br>
+28475 30532 297 0<br>
+</code>
+<hr>
+</body>
+</html>

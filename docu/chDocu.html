@@ -1,0 +1,38 @@
+﻿<html>
+<head>
+<title>Highway Hierarchies Input Format for Directed Graphs</title>
+</head>
+<body>
+<h2>Contraction Hierarchy Output Format</h2>
+Robert Geisberger, <a href="mailto:robert.geisberger@gmx.de">
+robert.geisberger@gmx.de</a>, Universität Karlsruhe (TH), March 2008<hr>
+usual file suffix: <b>.ch</b><br><br>
+<b>File Format:</b>
+<ul>
+<li>a <i>binary</i> file, 32-bit-interger organized<li>layout:<ul>
+	<li>&quot;<code>CH\r\n</code>&quot; (<code>0x32 0x48 0x0d 0x0a</code>)<li>unsigned int: 
+	version (currently &quot;<code>1</code>&quot;, shold be <code>==</code> compared)<li>
+	unsigned int: number of nodes (= n)<li>unsigned int: number of original edges 
+	(= m<sub>1</sub>)<li>unsigned int: number of shortcut edges (= m<sub>2</sub>)<li>n times, for each 
+	node 0..(n-1):<ul>
+		<li>unsigned int: level</ul>
+	<li>m<sub>1</sub> times, original edges:<ul>
+		<li>unsigned int: source node
+		<li>unsigned int: target node
+		<li>unsigned int: weight
+		<li>unsigned int: flags</ul>
+	<li>m<sub>2</sub> times, shortcut edges:<ul>
+		<li>unsigned int: source node
+		<li>unsigned int: target node
+		<li>unsigned int: weight
+		<li>unsigned int: flags
+		<li>unsigned int: shortcut middle node
+		</ul>
+	<li>unsigned int: <code>0x12345678</code> as terminator</ul>
+<li>possible (bit) flags are:<ul>
+	<li><code>1</code> = forward edge<li><code>2</code> = backward edge<li>
+	<code>4</code> = shortcut edge<li>Note that not all edges of the original 
+graph are listed as original edges. Edges that are not on any shortest path may 
+be removed or replaced by shortcuts.
+</body>
+</html>
