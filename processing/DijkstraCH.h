@@ -59,7 +59,7 @@ namespace processing {
      * @param manyToManyMode various modes related to many-to-many computations
      * @param localSearch local search, stop criterions like settled nodes limit or reached targets can be used.
      * @param countHops required for local search with hop-limits
-     */ 
+     */
     template < typename Graph,
     typename PQueue,
     int searchDirections,
@@ -74,7 +74,7 @@ namespace processing {
         friend ostream& operator<<( ostream& os, const DijkstraCH &dijkstra ) {
             for (NodeID i=0; i<dijkstra._graph->noOfNodes(); i++) {
                 os << "Node " << i << ": ";
-                for (int j=0; j<searchDirections; j++) {       
+                for (int j=0; j<searchDirections; j++) {
                     NodeID index = dijkstra.isReached(j, i);
                     if (index) {
                         if (! dijkstra.isSettled(j, i) ) os << "*";
@@ -85,13 +85,13 @@ namespace processing {
                     else {
                         os << "X | ";
                     }
-                }       
+                }
                 os << endl;
             }
             return os;
         }
 
-    
+
 public:
     typedef typename PQueue::PQElement PQElement;
     typedef typename PQueue::PQData PQData;
@@ -110,12 +110,12 @@ public:
 
 
 
-    /** 
+    /**
     * Unidirectional search from a given node s.
     * Used by the construction and the normal version of Dijkstra's algorithm.
     * @param s source node
     * @param searchID search directions
-    
+
     * The following parameters are only for local searches, template parameter localSearch enabled:
     * @param ignore ignore this node during the search (do not relax edges to this node)
     * @param maxKey stop the search if the smallest tentative distance in the pqueue is larger
@@ -127,7 +127,7 @@ public:
     *               needs to be enabled. 0 = disabled (only for localSearch)
     */
     void searchWithoutTarget(const NodeID s, const int searchID = 0, const NodeID ignore = SPECIAL_NODEID,
-                                const EdgeWeight maxKey = 0, const NodeID noOfTargets = 0, 
+                                const EdgeWeight maxKey = 0, const NodeID noOfTargets = 0,
                                 const NodeID maxSettled = 0, const NodeID maxHops = 0)
     {
         assert( checkClean() );
@@ -146,7 +146,7 @@ public:
             // a local search is limited
             if (localSearch)
             {
-                // abort local search if distance too far            
+                // abort local search if distance too far
                 if (u.dist > maxKey) break;
 
                 // search until all targets reached
@@ -175,7 +175,7 @@ public:
         }
     }
 
-    /** 
+    /**
     * Bidirectional search from a given node s to a given node t (and vice versa).
     * Used by the bidirectional version of Dijkstra's algorithm
     * and the multilevel query ("hwy search").
@@ -200,7 +200,7 @@ public:
         CurrentNode u;
         int searchID = 0;
         bool pqEmpty[2] = {pqueue(0).empty(), pqueue(1).empty()};
-        while (! (pqEmpty[0] && pqEmpty[1])) {          
+        while (! (pqEmpty[0] && pqEmpty[1])) {
 
             // different strategies: "Which pqueue should be preferred ?"
             PQ_BIDIR_MIN( if (pqueue(1).min() < pqueue(0).min()) searchID = 1; else searchID = 0 );
@@ -270,11 +270,11 @@ public:
     NodeID parentOf(const NodeID t, const int searchID = 0) const {
         const NodeID index = isReached(searchID, t);
         assert( index );
-        return pqData(searchID, index).parentNode(); 
+        return pqData(searchID, index).parentNode();
     }
-    
+
     /**
-    * Determines the shortest path from the source node s of the search 
+    * Determines the shortest path from the source node s of the search
     * that has been performed last to the given node t.
     * @param path a reference to the path object that accepts the result
     * @param t the target node (not relevant if searchID = -1)
@@ -346,30 +346,30 @@ public:
 
         if ( expand )
         {
-            // simple expand routine, because shortcut 
+            // simple expand routine, because shortcut
             // from parent->child is original parent->middle->child
-            
+
             // If we found a shortcut, we replace it by the two originating
             // edges. One edge is put on a stack and the second one is processed
             // in the next pass of the loop. _expandPathStack is this stack.
             assert( _expandPathStack.empty() );
             NodeID parent = SPECIAL_NODEID;
             EdgeID e = SPECIAL_NODEID;
-            
+
             // If we found a shortcut, we replace it by the two originating
             // edges. One edge is put on a stack and the second one is processed
             // in the next pass of the loop. processSecondHalf indicates this.
             bool processSecondHalf = false;
-            
+
             // Main loop, will run until all edges are replaced by shorcut edges.
-            while (true) 
+            while (true)
             {
                 // This variable determines which of the two edges of a shortcut is
                 // accessed first in the edge array. Intuitively, the edge that
                 // is processed first should be accessed first. But tests indicate
                 // otherwise.
                 //bool shortcutParent1Child2 = !forward;
-                
+
                 // To process an edge, we need the edge id of this edge
                 // and the parent in the Dijkstra search graph to ensure
                 // a correct order of the edges in the unpacked path.
@@ -378,7 +378,7 @@ public:
                 // (processSecondHalf == true)...
                 if ( !processSecondHalf )
                 {
-                    // ... or we take the next edge from the path found by the query algorithm if 
+                    // ... or we take the next edge from the path found by the query algorithm if
                     // the stack is empty ...
                     if ( _expandPathStack.empty() )
                     {
@@ -406,7 +406,7 @@ public:
             }
             assert( _expandPathStack.empty() );
         }
-        
+
         // No path expansion requested, only return path found by query algorith.
         else
         {
@@ -440,17 +440,17 @@ public:
      * reads the path that should be expanded from a Path object instead of the Dijkstra search tree.
      * This is used for the forward search since an extracted path would be read from the Dijkstra
      * search three reversed, meaning from the target (or via node) to the source node. We do not want
-     * to reverse the expanded path (100 times longer than the path found by the query algorithm). 
+     * to reverse the expanded path (100 times longer than the path found by the query algorithm).
      * So we store the reversed path found by the query algorithm, process it backwards to get an expanded
      * path forwards.
      * @param reverse should be expanded path be reversed to the input path
      * @param forward is the input path forward from source node to target node (or via node)
      * @param newPath should the pathExpanded return path be cleared and newly initalized
-     * @param path a reference to the original path object 
+     * @param path a reference to the original path object
      * @param pathExpanded a reference to the path object that accepts the expanded result
      */
     template<bool reverse, bool forward, bool newPath>
-    void expandPath(const Path& path, Path& pathExpanded) 
+    void expandPath(const Path& path, Path& pathExpanded)
     {
         if (newPath) pathExpanded.clear();
         // simple expand routine, because shortcut from parent->child is original parent->middle->child
@@ -485,19 +485,19 @@ public:
         assert( _expandPathStack.empty() );
         NodeID parent = SPECIAL_NODEID;
         EdgeID e = SPECIAL_NODEID;
-        
-        
-        
+
+
+
         // If we found a shortcut, we replace it by the two originating
         // edges. One edge is put on a stack and the second one is processed
         // in the next pass of the loop. processSecondHalf indicates this.
         bool processSecondHalf = false;
-        
+
         // Main loop, will run until all edges are processed.
         // These can be on the stack or on the input path.
         while (!(_expandPathStack.empty() &&
                 (( reverse && (index == SPECIAL_NODEID) )
-                || ( !reverse && index >= path.noOfEdges() )))) 
+                || ( !reverse && index >= path.noOfEdges() ))))
         {
             // This variable determines which of the two edges of a shortcut is
             // accessed first in the edge array. Intuitively, the edge that
@@ -513,7 +513,7 @@ public:
             // (processSecondHalf == true)...
             if ( !processSecondHalf )
             {
-                // ... or we take the next edge from the path found by the query algorithm if 
+                // ... or we take the next edge from the path found by the query algorithm if
                 // the stack is empty ...
                 if ( _expandPathStack.empty() )
                 {
@@ -542,7 +542,7 @@ public:
                     //shortcutParent1Child2 = !shortcutParent1Child2;
                 }
             }
-            
+
             // process edge
             expandEdge( pathExpanded, t, parent, e, processSecondHalf, forward );
         }
@@ -567,7 +567,7 @@ public:
         {
             NodeID middle = edge.shortcutMiddle();
             EdgeID firstEdge = _graph->firstLevelEdge(middle);
-            
+
             // edge.shortcutEdge1() and edge.shortcutEdge2() are a relative index
             // into the adjacency array of the middle node. They are valid if
             // they are != edge.shortcutEdgeLimit()
@@ -594,16 +594,16 @@ public:
                 {
                     EdgeID dummy = eParent;
                     eParent = eChild;
-                    eChild = dummy;   
+                    eChild = dummy;
                 }
             }
 
             // at least on of eParent or eChild is invalid, need to scan through the EdgeID
-            // array of the middle node to find the required edges. This can happen if there 
+            // array of the middle node to find the required edges. This can happen if there
             // are more than shortcutEdgeLimit() edges incident to a node.
-            else 
+            else
             {
-                if ( eParent == edge.shortcutEdgeLimit() ) 
+                if ( eParent == edge.shortcutEdgeLimit() )
                 {
                     eParent = SPECIAL_NODEID;
                     if ( eChild == edge.shortcutEdgeLimit() ) eChild = SPECIAL_NODEID;
@@ -625,7 +625,7 @@ public:
                     }
 
                 }
-                else 
+                else
                 {
                     eParent += firstEdge;
                     // Switch child <-> parent if required, the edges in the
@@ -640,7 +640,7 @@ public:
                     {
                         eParent = SPECIAL_NODEID;
                     }
-                }     
+                }
 
                 NodeID directionParent = forward ? 1 : 0;
                 NodeID directionChild  = 1-directionParent;
@@ -671,15 +671,15 @@ public:
             assert( _graph->edge(eParent).target() == parent );
             assert( _graph->edge(eChild).target() == t );
             assert( _graph->edge(eParent).weight() + _graph->edge(eChild).weight() == edge.weight() );
-            
+
             // The first of the two edges is put on the stack ...
             _expandPathStack.push( make_pair( parent, eParent ) );
-            // .. the other edge one is process in the next pass of the loop. 
+            // .. the other edge one is process in the next pass of the loop.
             processSecondHalf = true;
             parent = middle;
             e = eChild;
         }
-        
+
         // Edge was no shortcut, can be added to the expanded path
         else
         {
@@ -688,8 +688,8 @@ public:
             path.add( t, edge.weight(), e, edge.isShortcut() );
         }
     }
-    
-    
+
+
 
     /**
     * Returns true iff s is the parent of u.
@@ -730,7 +730,7 @@ public:
 
     /**
     * Returns for a given search direction a reference to the vector
-    * that contains the ids of all settled nodes. 
+    * that contains the ids of all settled nodes.
     */
     vector<NodeID>& settledNodes(int searchID) { return _settledNodes[searchID]; }
 
@@ -746,7 +746,7 @@ public:
             const PQData& data = pqData(searchID, index);
             if (data.isStartNode()) continue;
 
-            searchSpace.push_back( 
+            searchSpace.push_back(
                 SearchSpaceEdge(data.parentNode(), v, data.parentEdge(), k) );
         }
     }
@@ -773,15 +773,15 @@ public:
     }
 
 
-    /** 
+    /**
     * Returns the index of the corresponding pq element
     * if the specified node is reached; returns 0, otherwise.
     */
     NodeID isReached(int searchID, NodeID vID) const {
         return isReached(searchID, _graph->node(vID));
-    }  
-    
-    /** 
+    }
+
+    /**
     * Returns the index of the corresponding pq element
     * if the specified node is reached; returns 0, otherwise.
     */
@@ -790,9 +790,9 @@ public:
         if (index == 0) return 0;
         if (pqueue(searchID).isDummy(index)) return 0;
         return index;
-    }  
-    
-    /** 
+    }
+
+    /**
     * Returns the index of the corresponding pq element
     * if the specified node is settled; returns 0, otherwise.
     */
@@ -805,7 +805,7 @@ public:
         if (pqueue(searchID).elements()[index].hasBeenDeleted()) return index;
         return 0;
     }
-        
+
     /** Returns the key of the specified pq element. */
     EdgeWeight pqKey(int searchID, NodeID index) const {
         assert( (searchID >= 0) && (searchID < searchDirections) );
@@ -814,23 +814,23 @@ public:
 
         return pqueue(searchID).elements()[index].key();
     }
-    
+
     /** Returns a reference to the data object of the specified pq element. */
     PQData& pqData(int searchID, NodeID index) {
         assert( (searchID >= 0) && (searchID < searchDirections) );
         assert( (index > 0) && (index < pqueue(searchID).elements().size()) );
         assert( ! pqueue(searchID).isDummy(index) );
 
-        return pqueue(searchID).elements()[index].data();        
+        return pqueue(searchID).elements()[index].data();
     }
-    
+
     /** Returns a reference to the data object of the specified pq element. */
     const PQData& pqData(int searchID, NodeID index) const {
         assert( (searchID >= 0) && (searchID < searchDirections) );
         assert( (index > 0) && (index < pqueue(searchID).elements().size()) );
         assert( ! pqueue(searchID).isDummy(index) );
 
-        return pqueue(searchID).elements()[index].data();        
+        return pqueue(searchID).elements()[index].data();
     }
 
     /**
@@ -863,7 +863,7 @@ public:
         NodeID result = 0;
         for ( int searchID = 0; searchID < searchDirections; searchID ++ )
         {
-            for ( vector<NodeID>::const_iterator iter =  _settledNodes[searchID].begin(); 
+            for ( vector<NodeID>::const_iterator iter =  _settledNodes[searchID].begin();
                   iter != _settledNodes[searchID].end(); iter++ )
             {
                 if ( !pqData( searchID, isReached( searchID, *iter ) ).stalled() ) result++;
@@ -928,7 +928,7 @@ public:
     bool searchNext(NodeID& node, EdgeWeight& dist, NodeID& parent ) {
         CurrentNode u;
         if (! pqueue(0).empty() ) {
- 
+
             // *** deleteMin ***
             deleteMin(0, u);
 
@@ -940,10 +940,10 @@ public:
         }
         return false;
     }
-    
+
 
 private:
-    /** 
+    /**
     * Encapsulates data about the current node, i.e.,
     * the node that has just been deleted from the pqueue.
     */
@@ -952,7 +952,7 @@ private:
         public:
             CurrentNode() {}
             CurrentNode(NodeID nID, EdgeWeight w) : nodeID(nID), dist(w) {}
-    
+
             /** The id of this node. */
             NodeID nodeID;
             /** The id of the edge that is being relaxed. */
@@ -1003,7 +1003,7 @@ private:
 
     /** Used for the stalling BFS (DM_QUERY). */
     queue< pair<NodeID, EdgeWeight> > _stallQueue;
-    
+
     /** Used for path expansion. */
     stack< pair<NodeID,EdgeID> > _expandPathStack;
 
@@ -1025,8 +1025,8 @@ private:
         PQData& data = pqData(searchID, index);
         data.setStartNode();
     }
-    
-    /** 
+
+    /**
     * Inserts the given node with the given distance from the source node
     * into the pqueue of the specified search direction.
     * @return the index of the pq element that represents the inserted node
@@ -1123,7 +1123,7 @@ private:
             }
         }
         return false;
-    } 
+    }
 
     /**
     * Decreases the key of a given node if applicable.
@@ -1179,7 +1179,7 @@ private:
         for (parent.edgeID = firstEdge; parent.edgeID < lastEdge; parent.edgeID++) {
             // note: parent.edgeID contains the id of the edge that should be relaxed
             // *** relaxEdge(searchID, parent, edgeLevel); ***
-            
+
             // reference to the edge that should be relaxed
             Edge& edge = _graph->edge(parent.edgeID);
 
@@ -1191,7 +1191,7 @@ private:
             {
                 // try to wake up a node v that can start a stalling process
                 index = isReached(searchID, v);
-                // Node v has to be the endpoint of an edge (u,v) that 
+                // Node v has to be the endpoint of an edge (u,v) that
                 // points into the opposite direction
                 // (because then the edge (v,u) which is used in the stalling process points into
                 //  the right direction).
@@ -1239,14 +1239,14 @@ private:
                 PQData& data = pqData(searchID, e);
                 // update the parent of the node v
                 data.updateParent( parent.nodeID, parent.edgeID );
-                
-                // reached from a new parent -> stalling of this node 
+
+                // reached from a new parent -> stalling of this node
                 // (if it has occured) is no longer valid!
                 if (stallOnDemand)
                 {
                     data.unstall();
                 }
-                
+
                 // count hops of the current paths from the source node
                 // used for local search with hop-limits
                 if (countHops)
@@ -1268,14 +1268,14 @@ private:
         }
     }
 
-    /** 
-    * Clears a given node vector. 
+    /**
+    * Clears a given node vector.
     * Deletes all corresponding pqueue elements.
     */
     void clearNodeVector(int searchID, vector<NodeID>& nodeVector) {
         for (NodeID i = 0; i < nodeVector.size(); i++) {
             _graph->node( nodeVector[i] ).pqElement(0);
-        }       
+        }
         nodeVector.clear();
     }
 
@@ -1354,7 +1354,7 @@ private:
         }
     }
 
-    /** 
+    /**
     * Continue stalling process (see stall()) using the parent pointers.
     * This can increase the number of stalled nodes if search graphs are used that
     * store an edge only at the incident node with the smaller level.
@@ -1388,7 +1388,7 @@ private:
 } // namespace
 
 /** Used for the many-to-many forward search. */
-typedef processing::DijkstraCH<datastr::graph::SearchGraph, DynQueryPQueue, 2, true, true, 
+typedef processing::DijkstraCH<datastr::graph::SearchGraph, DynQueryPQueue, 2, true, true,
 processing::MTMM_FW, false, false> DijkstraCHManyToManyFW;
 
 /** Used for the many-to-many backward search. */
@@ -1396,18 +1396,18 @@ typedef processing::DijkstraCH<datastr::graph::SearchGraph, DynQueryPQueue, 2, t
 processing::MTMM_BW, false, false> DijkstraCHManyToManyBW;
 
 /** Used for local searches during the contraction. */
-typedef processing::DijkstraCH<datastr::graph::UpdateableGraph, LocalSearchPQueue, 
+typedef processing::DijkstraCH<datastr::graph::UpdateableGraph, LocalSearchPQueue,
     1, false, false, processing::MTMM_NONE, true, true > LocalDijkstraContract;
 
 /** Used for upates of Voronoi regions (priority term) during node ordering */
-typedef processing::DijkstraCH<datastr::graph::UpdateableGraph, NormalPQueue, 1, false, false, 
+typedef processing::DijkstraCH<datastr::graph::UpdateableGraph, NormalPQueue, 1, false, false,
     processing::MTMM_NONE, false, false > DijkstraUpdateVoronoi;
-        
+
 /** Used for bidirectional fast query in contraction hierarchies. */
-typedef processing::DijkstraCH<datastr::graph::SearchGraph, DynQueryPQueue, 
+typedef processing::DijkstraCH<datastr::graph::SearchGraph, DynQueryPQueue,
     2, true /*stall-on-demand*/, false/*deep stall-on-demand*/> DijkstraSearchCH;
 
-/** Normal bidirectional query. Used for testing and debugging. */    
-typedef processing::DijkstraCH<datastr::graph::UpdateableGraph, NormalPQueue, 2, false> DijkstraSearchBidir;    
+/** Normal bidirectional query. Used for testing and debugging. */
+typedef processing::DijkstraCH<datastr::graph::UpdateableGraph, NormalPQueue, 2, false> DijkstraSearchBidir;
 
 #endif // _PROCESSING_DIJKSTRACH_H

@@ -37,7 +37,7 @@ void exportSearchGraph(ostream& out, const Graph* g)
         m += g->lastEdge(g->mapExtToIntNodeID(u)) - g->firstLevelEdge(g->mapExtToIntNodeID(u));
         mapIntToExtNodeID[g->mapExtToIntNodeID(u)] = u;
     }
-    
+
     out << g->noOfNodes() << " " << m << endl;
     for ( NodeID u = 0; u < g->noOfNodes(); u++ )
     {
@@ -69,7 +69,7 @@ void exportContractionHierarchy(ostream& out, const Graph* g)
         cerr << "Please #define USE_CH_EXPAND in config.h" << endl;
         exit(1);
     }
-    
+
     double time = timestamp();
 
     unsigned int version = 1;
@@ -77,11 +77,11 @@ void exportContractionHierarchy(ostream& out, const Graph* g)
     unsigned int m1 = 0;
     unsigned int m2 = 0;
 
-    // edge flags    
+    // edge flags
     const unsigned int CH_EDGE_FLAG_FORWARD  = 1 << 0;
     const unsigned int CH_EDGE_FLAG_BACKWARD = 1 << 1;
     const unsigned int CH_EDGE_FLAG_SHORTCUT = 1 << 2;
-    
+
     for ( NodeID u = 0; u < g->noOfNodes(); u++ )
     {
         EdgeID lastEdge = g->lastEdge(u);
@@ -98,14 +98,14 @@ void exportContractionHierarchy(ostream& out, const Graph* g)
             }
         }
     }
-    
+
     VERBOSE( cout << "Contraction Hierarchy file format version " << version << endl; )
     VERBOSE( cout << n << " nodes" << endl; )
     VERBOSE( cout << m1 << " original edges" << endl; )
     VERBOSE( cout << m2 << " shortcut edges" << endl; )
-    
+
     // === BEGIN OF EXPORT ===
-    
+
     // header
     // ------
     // id
@@ -118,7 +118,7 @@ void exportContractionHierarchy(ostream& out, const Graph* g)
     writePrimitive( out, m1 );
     // m2 ( number of shortcut edges )
     writePrimitive( out, m2 );
-    
+
     // levels for nodes 0..(n-1)
     // -------------------------
 
@@ -132,7 +132,7 @@ void exportContractionHierarchy(ostream& out, const Graph* g)
         writePrimitive( out, level );
         VERBOSE( percent1.printStatus( i1++ ); )
     }
-    
+
     // orignal (=non shortcut) edges
     // -----------------------------
     VERBOSE( cout << "Export original edges..." << endl; );
@@ -149,12 +149,12 @@ void exportContractionHierarchy(ostream& out, const Graph* g)
                 unsigned int source = u;
                 unsigned int target = edge.target();
                 unsigned int weight = edge.weight();
-                
+
                 // edge flags
                 unsigned int flags = 0;
                 if ( edge.isDirected(0) ) flags |= CH_EDGE_FLAG_FORWARD;
                 if ( edge.isDirected(1) ) flags |= CH_EDGE_FLAG_BACKWARD;
-                
+
                 // source node
                 writePrimitive( out, source );
                 // target node
@@ -163,12 +163,12 @@ void exportContractionHierarchy(ostream& out, const Graph* g)
                 writePrimitive( out, weight );
                 // flags
                 writePrimitive( out, flags );
-                
-                VERBOSE( percent2.printStatus( i2++ ); )       
+
+                VERBOSE( percent2.printStatus( i2++ ); )
             }
         }
     }
-    
+
     // shortcut edges
     // --------------
     VERBOSE( cout << "Export shortcut edges..." << endl; );
@@ -186,12 +186,12 @@ void exportContractionHierarchy(ostream& out, const Graph* g)
                 unsigned int target = edge.target();
                 unsigned int weight = edge.weight();
                 unsigned int middle = edge.shortcutMiddle();
-                
+
                 // edge flags
                 unsigned int flags = CH_EDGE_FLAG_SHORTCUT;
                 if ( edge.isDirected(0) ) flags |= CH_EDGE_FLAG_FORWARD;
                 if ( edge.isDirected(1) ) flags |= CH_EDGE_FLAG_BACKWARD;
-                
+
                 // source node
                 writePrimitive( out, source );
                 // target node
@@ -202,18 +202,18 @@ void exportContractionHierarchy(ostream& out, const Graph* g)
                 writePrimitive( out, flags );
                 // middle node of shortcut
                 writePrimitive( out, middle );
-                
-                VERBOSE( percent3.printStatus( i3++ ); )       
+
+                VERBOSE( percent3.printStatus( i3++ ); )
             }
         }
     }
     unsigned int end = 0x12345678;
-    writePrimitive( out, end );    
+    writePrimitive( out, end );
     // === END OF EXPORT
-    
+
     time = timestamp() - time;
     VERBOSE( cout << "Export done, took " << time << " seconds." << endl; )
-    
+
 }
 
 #endif // OUTPUT_H

@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007, 2008 
+/* Copyright (C) 2005, 2006, 2007, 2008
  * Robert Geisberger, Dominik Schultes, Peter Sanders,
  * Universitaet Karlsruhe (TH)
  *
@@ -23,7 +23,7 @@
 #define SERIALIZE_H
 
 
-#include <ext/hash_map>
+#include <unordered_map>
 
 /** Writes a given primitive value (e.g. int, double) to the given stream. */
 template < typename value_type >
@@ -69,7 +69,7 @@ public:
         firstSerializer::serialize(out, v.first);
         secondSerializer::serialize(out, v.second);
     }
-    
+
     static void deserialize(istream& in, value_type& v) {
         firstSerializer::deserialize(in, v.first);
         secondSerializer::deserialize(in, v.second);
@@ -125,8 +125,8 @@ private:
     typedef PairSerializer< key_type, data_type,
                             PrimitiveSerializer<key_type>,
                             data_serializer > value_serializer;
-    typedef __gnu_cxx::hash_map<key_type, data_type> HashMap;
-    
+    typedef std::unordered_map<key_type, data_type> HashMap;
+
 public:
     static void serialize(ostream& out, const HashMap& hm) {
         size_type n = (size_type)hm.size();

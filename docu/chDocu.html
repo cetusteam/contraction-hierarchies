@@ -10,10 +10,10 @@ usual file suffix: <b>.ch</b><br><br>
 <b>File Format:</b>
 <ul>
 <li>a <i>binary</i> file, 32-bit-interger organized<li>layout:<ul>
-	<li>&quot;<code>CH\r\n</code>&quot; (<code>0x32 0x48 0x0d 0x0a</code>)<li>unsigned int: 
+	<li>&quot;<code>CH\r\n</code>&quot; (<code>0x32 0x48 0x0d 0x0a</code>)<li>unsigned int:
 	version (currently &quot;<code>1</code>&quot;, shold be <code>==</code> compared)<li>
-	unsigned int: number of nodes (= n)<li>unsigned int: number of original edges 
-	(= m<sub>1</sub>)<li>unsigned int: number of shortcut edges (= m<sub>2</sub>)<li>n times, for each 
+	unsigned int: number of nodes (= n)<li>unsigned int: number of original edges
+	(= m<sub>1</sub>)<li>unsigned int: number of shortcut edges (= m<sub>2</sub>)<li>n times, for each
 	node 0..(n-1):<ul>
 		<li>unsigned int: level</ul>
 	<li>m<sub>1</sub> times, original edges:<ul>
@@ -31,8 +31,8 @@ usual file suffix: <b>.ch</b><br><br>
 	<li>unsigned int: <code>0x12345678</code> as terminator</ul>
 <li>possible (bit) flags are:<ul>
 	<li><code>1</code> = forward edge<li><code>2</code> = backward edge<li>
-	<code>4</code> = shortcut edge<li>Note that not all edges of the original 
-graph are listed as original edges. Edges that are not on any shortest path may 
+	<code>4</code> = shortcut edge<li>Note that not all edges of the original
+graph are listed as original edges. Edges that are not on any shortest path may
 be removed or replaced by shortcuts.
 </body>
 </html>

@@ -51,7 +51,7 @@ static const int COUNT_ENTRANCE_POINTS = 1;
 static const unsigned int COUNT_LEVEL_END = 50;
 
 
-/** 
+/**
  * Provides counters for one level.
  * The current implementation only supports a delMin counter
  * and an entrance point counter.
@@ -60,7 +60,7 @@ class LevelCounter
 {
 public:
     LevelCounter() : _delMins(0), _entrancePoints(0) {}
-    
+
     void inc(int i) {
         assert( (i == COUNT_DEL_MIN) || (i == COUNT_ENTRANCE_POINTS) );
         if (i == COUNT_DEL_MIN) _delMins++;
@@ -72,7 +72,7 @@ public:
         os << "Level " << level << ": delMins = " << _delMins
            << "; entrance points = " << _entrancePoints << endl;
     }
-    
+
 private:
     double _delMins;
     double _entrancePoints;
@@ -89,7 +89,7 @@ class LevelCounters
         }
         return os;
     }
-    
+
 public:
     /** Increments the specified counter of the given level. */
     void inc(unsigned int level, int i) {
@@ -110,7 +110,7 @@ public:
             _levelCounter[_entrancePointLevels[x]].inc(i);
         _entrancePointLevels.clear();
     }
-    
+
 private:
     /** The level counters. */
     LevelCounter _levelCounter[COUNT_LEVEL_END];
@@ -136,14 +136,14 @@ class Counter
         os << counter._levelCounters;
         return os;
     }
-    
+
 public:
     Counter() {
         reset();
         _descrSingle[0] = "ImprovementsAfterMeeting";
         _descrSingle[1] = "DeleteMinAfterMeeting";
         _descrSingle[2] = "DeleteMinAfterImprovement";
-        
+
         _descrDouble[0] = "DeleteMin";
         _descrDouble[1] = "DecreaseKey";
         _descrDouble[2] = "SkippedEdges";
@@ -173,7 +173,7 @@ public:
     void resetDouble(int j = COUNT_AKKU) {
         for (int i = 0; i < COUNT_DOUBLE_END; i++) reset(i, j);
     }
-    
+
     /** Resets the specified single counter. */
     void reset(int i) {
         assert( i < COUNT_SINGLE_END );
@@ -231,26 +231,26 @@ public:
         assert( i < COUNT_DOUBLE_END );
         return _countsDouble[j][i];
     }
-    
+
     /** Returns a description of the meaning of the specified single counter. */
     string descrSingle(int i) const { return _descrSingle[i]; }
 
     /** Returns a description of the meaning of the specified double counter. */
     string descrDouble(int i) const { return _descrDouble[i]; }
-    
+
 private:
     /** The values of the single counters. */
     double _countsSingle[COUNT_SINGLE_END];
-    
+
     /** The values of the double counters. */
     double _countsDouble[2][COUNT_DOUBLE_END];
-    
+
     /** The descriptions of the meaning of the single counters. */
     string _descrSingle[COUNT_SINGLE_END];
 
     /** The descriptions of the meaning of the double counters. */
     string _descrDouble[COUNT_DOUBLE_END];
-    
+
     /** The level counters. */
     LevelCounters _levelCounters;
 };

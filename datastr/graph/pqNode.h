@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007, 2008 
+/* Copyright (C) 2005, 2006, 2007, 2008
  * Robert Geisberger, Dominik Schultes, Peter Sanders,
  * Universitaet Karlsruhe (TH)
  *
@@ -26,7 +26,7 @@
 #include "../pqueue/binaryHeap.h"
 
 
-/** 
+/**
  * Encapsulates data that is associated with a node that is in the
  * pqueue, only stores NodeID
  */
@@ -41,15 +41,15 @@ public:
         _nodeID = nodeID;
     }
 
-    /** Returns the id of the node this object is associated with. */ 
+    /** Returns the id of the node this object is associated with. */
     NodeID nodeID() const {return _nodeID;}
-    
+
 private:
     /** The id of the node this object is associated with. */
     NodeID _nodeID; // possibility to save memory: use parentEdge.target()
 };
 
-/** 
+/**
  * Encapsulates data that is associated with a node that is in the
  * pqueue (for a certain search direction).
  */
@@ -85,21 +85,21 @@ public:
     /**
      * Set a new parent for this node.
      * @param parentNode the parent node
-     * @param parentEdge the edge that leads from the parent to this node     
+     * @param parentEdge the edge that leads from the parent to this node
      */
     void updateParent(NodeID parentNode, EdgeID parentEdge) {
         _parentNode = parentNode;
         _parentEdge = parentEdge;
     }
 
-    /** Returns the id of the node this object is associated with. */ 
+    /** Returns the id of the node this object is associated with. */
     NodeID nodeID() const {return _nodeID;}
     /** Returns the id of the parent node. */
     NodeID parentNode() const {return _parentNode;}
     /** Returns the id of the edge that leads from the parent to this node. */
     EdgeID parentEdge() const {return _parentEdge;}
 
-    
+
     /**
     * The stalling concept is only used in case of the HNR query.
     * In PQueueNodeDynQuery, this method is overwritten appropriately.
@@ -108,8 +108,8 @@ public:
     * @see DijkstraTemplate::obtainRelevantSearchSpace
     */
     bool stalled() const {return false;}
-    
-    
+
+
     // The following dummy methods are required to provide the same interface
     // in all PQueueNode subclasses so that the compiler does not complain.
     // These dummy methods are never called.
@@ -135,8 +135,8 @@ public:
     bool isEliminated() const { assert(false); return false; }
     void setEliminated(bool value) { assert(false); }
     unsigned int hops() const { assert( false ); return 0; }
-    void setHops(unsigned int v) { assert( false ); }    
-    
+    void setHops(unsigned int v) { assert( false ); }
+
 private:
     /** The id of the node this object is associated with. */
     NodeID _nodeID; // possibility to save memory: use parentEdge.target()
@@ -154,23 +154,23 @@ private:
 class PQueueNodeLocalSearch : public PQueueNode
 {
 public:
-    PQueueNodeLocalSearch() 
-    : _target(false), 
-      _eliminated(false), 
+    PQueueNodeLocalSearch()
+    : _target(false),
+      _eliminated(false),
       _hops(0) {}
-    
+
     /** If node is a target of the local search */
     bool isTarget() const { return _target; }
     void setTarget(bool value) { _target = value; }
 
-    
+
     /* If node is already elminated / contracted. */
     bool isEliminated() const { return _eliminated; }
     void setEliminated(bool value) { _eliminated = value; }
-    
+
     /* Hops (edges) to the source node. */
     unsigned int hops() const { return _hops; }
-    void setHops(unsigned int v) { _hops = v; }    
+    void setHops(unsigned int v) { _hops = v; }
 private:
     bool _target:1;
     bool _eliminated:1;
@@ -186,7 +186,7 @@ class PQueueNodeHwySearch : public PQueueNode
 {
 public:
     PQueueNodeHwySearch() : _potential(0), _active(true) {}
-    
+
     /**
      * Sets the search level and the distance to the border
      * of the applicable neighbourhood.
@@ -202,21 +202,21 @@ public:
 
     /** Returns the search level. */
     LevelID level() const {return _level;}
-    
+
     /** Returns the distance to the border of the applicable neighbourhood. */
     EdgeWeight distanceToLevelBorder() const {return _distToLevelBorder;}
 
     EdgeWeight potential() const {return _potential;}
 
     bool isActive() const { return _active; }
-    
+
     void setActive(bool act) { _active = act; }
-    
+
 private:
     /** The search level. */
     LevelID _level;
-    
-    /** 
+
+    /**
      * The distance to the border of the applicable neighbourhood.
      * When this border is crossed, the current search level is left.
      */
@@ -245,17 +245,17 @@ class PQueueNodeDynConstr : public PQueueNode
 {
 private:
     typedef unsigned short CounterType;
-    
+
 public:
     PQueueNodeDynConstr() : _hwyNodeCounter(0), _maverick(false) {}
 
     CounterType hwyNodeCount() const { return _hwyNodeCounter; }
-    
+
     void setHwyNodeCount(const CounterType c) {
         _hwyNodeCounter = c;
         _maverick = false;
     }
-    
+
     void incHwyNodeCount() { _hwyNodeCounter++; }
 
     bool isActive() const { return ((hwyNodeCount() == 0) && (!_maverick)); }
@@ -263,7 +263,7 @@ public:
     bool isCovered() const { return (hwyNodeCount() > 0); }
 
     void setMaverick() { _maverick = true; }
-    
+
 private:
     /**
     * Counts the number of nodes that belong to the overlay graph
@@ -287,13 +287,13 @@ class PQueueNodeDynQuery : public PQueueNode
 {
 public:
     PQueueNodeDynQuery() {unstall();}
-    
+
     bool stalled() const { return (_stallKey != Weight::MAX_VALUE); }
     void unstall() { _stallKey = Weight::MAX_VALUE; }
 
     EdgeWeight stallKey() const { return _stallKey; }
     void stallKey(EdgeWeight k) { _stallKey = k; }
-    
+
 private:
     /**
     * If this node u has been stalled, some path from the source to u
@@ -316,7 +316,7 @@ private:
     static const char PASSIVE = 0;
     static const char ACTIVE = 1;
     static const char MAVERICK = 2;
-    
+
 public:
     /** Constructor. */
     PQueueNodeConstruction() :
@@ -336,18 +336,18 @@ public:
 		      const PQueueNodeConstruction& parentData, EdgeWeight dH, NodeID next) {
 	assert( dH <= Weight::SIGNED_MAX_VALUE );
 	assert( parentEdgeWeight <= Weight::SIGNED_MAX_VALUE );
-        
+
         // if this node is s_1 (i.e., its parent has key 0), then the distance to the neighbourhood border of s_1
         // is set to the neighbourhood radius of s_1; otherwise, we adapt the distance stored at the parent node
 	SignedEdgeWeight currentDist = (parentKey == 0) ? dH : (parentData.distToBorderOFs1() - parentEdgeWeight);
-	    
+
 	if (next == 0) { // if there is only a single tentative parent...
             // set the single parent
 	    PQueueNode::updateParent( parentNodeID, parentEdgeID );
 	    distToBorderOFs1( currentDist );
 	    // inherit data from the parent
 	    dist_s0u( parentData.dist_s0u() );
-	    _status = parentData._status;	    
+	    _status = parentData._status;
 	}
 	else { // if there are multiple tentative parents...
             // do not just inherit data from the new parent, but take the maxima of the already stored data
@@ -370,7 +370,7 @@ public:
     /** Returns true iff the neighbourhood of s_1 has been left. */
     bool nbrhOFs1Left() const {return (_distToBorderOFs1 < 0);}
 
-    /** 
+    /**
      * Returns true iff the distance from s_0 to u has been defined.
      * @see _dist_s0u
      */
@@ -386,7 +386,7 @@ public:
      */
     void dist_s0u(EdgeWeight d) {_dist_s0u = d;}
 
-        
+
 
     /**
      * Initializes the slack.
@@ -396,7 +396,7 @@ public:
     void initSlack(EdgeWeight sl) {
 	assert( sl <= Weight::SIGNED_MAX_VALUE );
 	SignedEdgeWeight signedSlack = (SignedEdgeWeight)sl;
-	
+
         if (! _slackDefined) {
             // leaf
 	    setSlack(signedSlack);
@@ -406,7 +406,7 @@ public:
             if (signedSlack < slack()) setSlack(signedSlack);
         }
     }
-    
+
     /**
      * Updates the slack.
      * @param child the child from which the update is invoked
@@ -424,25 +424,25 @@ public:
 	    setSlack(diff);
             return true;
         }
-        
+
         // if this slack is already negative, do nothing
         if ((_slackDefined) && (slack() < 0)) return false;
-        
+
         // if this slack hasn't been defined yet
-        // or the child causes a decrease of this slack...        
+        // or the child causes a decrease of this slack...
         if ((!_slackDefined) || (diff < slack())) setSlack(diff); // update this slack
         return false;
     }
 
-    /** 
-     * Deactivates this node iff the abort criterion is fulfilled. 
+    /**
+     * Deactivates this node iff the abort criterion is fulfilled.
      * @param dist the distance from s_0 to p
      * @param dH the value d_H(p)
      */
-    void abort(EdgeWeight dist, EdgeWeight dH) {        
+    void abort(EdgeWeight dist, EdgeWeight dH) {
         if (defined_dist_s0u()) { // d(s_0, u) has to be defined; otherwise, we can't abort
             assert( dist >= dist_s0u() );
-            EdgeWeight w = dist - dist_s0u(); // compute d(u,p)            
+            EdgeWeight w = dist - dist_s0u(); // compute d(u,p)
             if (w > dH) _status = PASSIVE; // deactivate
         }
     }
@@ -467,8 +467,8 @@ public:
 
     /** Returns the index of the next parent. */
     NodeID next() const {return _next;}
-    
-private:    
+
+private:
     /**
      * The distance to the border of the neighbourhood of s_1.
      * Also used to store the slack during the backward evaluation phase
@@ -476,14 +476,14 @@ private:
      * is no longer needed.
      */
     SignedEdgeWeight _distToBorderOFs1;
-    
-    /** 
+
+    /**
      * The distance from s_0 to u.
      * u is the direct predecessor of v, which is the last node within the
      * neighbourhood of s_1.
      */
     EdgeWeight _dist_s0u;
-    
+
     /** The index of the next parent. 0 if there is no next parent. */
     unsigned short _next;
 
@@ -492,9 +492,9 @@ private:
 
     /** True iff the slack has already been defined. */
     bool _slackDefined;
-    
 
-    
+
+
     /** Returns the distance to the border of the neighbourhood of s_1. */
     SignedEdgeWeight distToBorderOFs1() const {return _distToBorderOFs1;}
 

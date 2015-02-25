@@ -40,7 +40,7 @@ class Matrix
         }
         return os;
     }
-    
+
 public:
     bool operator== (const Matrix<value_type, size_type>& matrix) const {
         if (noOfRows() != matrix.noOfRows()) return false;
@@ -107,7 +107,7 @@ public:
         assert( i < noOfEntries() );
         return i;
     }
-    
+
 private:
     /** The number of rows. */
     const size_type _rows;
@@ -206,7 +206,7 @@ public:
 
         // only the 'int'-search space is used
         assert( _searchSpacesBwDynShort.size() == 0 );
-        
+
         // sort and copy
         VERBOSE( cout << "sort and copy" << endl );
         _searchSpacesBwDynInt.sort(_g->noOfNodes());
@@ -231,7 +231,7 @@ public:
                 for (NodeID i = 0; i < _searchSpaceFW.size(); i++) {
                     const NodeID via = _searchSpaceFW[i].target();
                     const EdgeWeight distFW = _searchSpaceFW[i].weight();
-                
+
                     const ISSInt::const_iterator endInt = _searchSpacesBwInt.end(via);
                     for (ISSInt::const_iterator it = _searchSpacesBwInt.begin(via); it != endInt; it++) {
                         result.improve(matrixIndexOffset + it->origin(), distFW + it->dist());
@@ -240,7 +240,7 @@ public:
                     }
                 }
             }
-            
+
             _searchSpaceFW.clear();
         }
         elapsedTime = timestamp() - start;
@@ -251,7 +251,7 @@ public:
         COUNTING( cout << "bucket scans (all): " << bucketScans << endl );
 	    //COUNTING( cout << "bucket scans (top): " << bucketScansTop << endl );
     }
-    
+
 private:
     Graph *const _g;
     DijkstraFW _dFW;

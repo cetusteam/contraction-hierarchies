@@ -38,7 +38,7 @@ public:
 	{
 		first = fst;
 		second = scnd;
-		third = thd; 
+		third = thd;
 	}
 };
 
@@ -55,7 +55,7 @@ public:
 	{
 		first = fst;
 		second = scnd;
-		third = thd; 
+		third = thd;
 		fourth = fth;
 	}
 };
@@ -129,7 +129,7 @@ datastr::graph::UpdateableGraph *readGraph(const char *gr_fln, const char *ch_fl
 void readTimeFns(datastr::graph::UpdateableGraph *gr, const char *fln, double unit)
 {
 	cout << "Reading time dependent edge weights from '" << fln << "'...\n";
-	
+
 	int n_removed_points = 0, n_const_fns = 0;
 
 	ifstream inFile(fln);
@@ -153,10 +153,10 @@ void readTimeFns(datastr::graph::UpdateableGraph *gr, const char *fln, double un
 
 		Edge *edge = edgeFromTo(gr, src, tgt);
 		assert (edge);
-		
+
 		inFile >> emptyTime;
 		assert (edge->weight() == emptyTime);
-		
+
 		int x, x_before, x_next, x_first;
 
 		inFile >> x;
@@ -180,8 +180,8 @@ void readTimeFns(datastr::graph::UpdateableGraph *gr, const char *fln, double un
 			}
 			else n_removed_points++;
 		}
-		
-		if (x_next != x || x_next != x_first) 
+
+		if (x_next != x || x_next != x_first)
 		{
 			pair<double,double> point((double)(23*3600) / TIME_UNIT, (double)x_next * ((1.0/TIME_UNIT) * unit) );
 			timeSample.push_back(point);
@@ -197,7 +197,7 @@ void readTimeFns(datastr::graph::UpdateableGraph *gr, const char *fln, double un
 
 	int alloc_n_points = TimeFn::getTotalAllocNPoints();
 	int alloc_mem_usage = (int)((double)alloc_n_points / (double)(1024 * 1024)) * sizeof(double);
-	
+
 	cout << "  total number of points is " << n_points << " requiring " << mem_usage << " MByte RAM.\n";
 	cout << "  allocated total number of points is " << alloc_n_points << " requiring " << alloc_mem_usage << " MByte RAM.\n";
 	cout << "  Note that " << n_removed_points << " redundant points have been removed from the input data.\n\n";

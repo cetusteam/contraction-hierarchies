@@ -31,7 +31,7 @@
 double random(double a, double b)
 {
 	assert(a < b);
-	
+
 	double res;
 
 	do {
@@ -40,7 +40,7 @@ double random(double a, double b)
 		// lift it such that it lies in [a,b)
 		res += a;
 	} while ( ! (a <= res && res < b) ); // if it does not lie in between [a,b) try again
-	
+
 	assert( a <= res && res < b );
 	return res;
 }

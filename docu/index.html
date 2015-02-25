@@ -12,14 +12,14 @@ robert.geisberger@gmx.de</a>, Universität Karlsruhe (TH), March 2008<br>
 concerns Revision 323<hr>
 
 <h3>Preliminary Remark</h3>
-The program was originally written for research purposes without having any user 
-in mind except for the developer. Therefore, the user interface is far from 
+The program was originally written for research purposes without having any user
+in mind except for the developer. Therefore, the user interface is far from
 being convenient.
 
 <h3>Overview</h3>
-<p>The program covers everything about <em>contraction hieararchies</em>. Before 
-compilation (just by typing <code>make</code>), make sure that the settings in 
-<code>config.h</code> match your requirements.<span lang="en"> Below a 
+<p>The program covers everything about <em>contraction hieararchies</em>. Before
+compilation (just by typing <code>make</code>), make sure that the settings in
+<code>config.h</code> match your requirements.<span lang="en"> Below a
 description of two common use cases: </span></p>
 <ul>
 	<li><span lang="en">creation of a node ordering</span></li>
@@ -28,60 +28,60 @@ description of two common use cases: </span></p>
 <h3><span lang="en">Node Ordering</span></h3>
 <ul>
 <li><span lang="en">If you only want to create a node ordering in form of a
-<code>hcn</code>-file.</span><li>Compile the program with <code>USE_CH_EXPAND</code> (in <code>config.h</code>) 
-switched <b>off</b>. If you use the command line argument &quot;<code>-e</code>&quot; then 
-also with <code>COUNT_SHORTCUT_ORIGINAL_EDGES</code> (in <code>config.h</code>) 
-switched <strong>on</strong>, otherwise <strong>off<span lang="en">,</span></strong><span lang="en"> 
-in doubt switch it on.</span> <span lang="en">&nbsp;Note: usually an edge needs 
+<code>hcn</code>-file.</span><li>Compile the program with <code>USE_CH_EXPAND</code> (in <code>config.h</code>)
+switched <b>off</b>. If you use the command line argument &quot;<code>-e</code>&quot; then
+also with <code>COUNT_SHORTCUT_ORIGINAL_EDGES</code> (in <code>config.h</code>)
+switched <strong>on</strong>, otherwise <strong>off<span lang="en">,</span></strong><span lang="en">
+in doubt switch it on.</span> <span lang="en">&nbsp;Note: usually an edge needs
 8 byte. Each one of those switches adds another 4 byte if switched on.</span><li>The input graph has to be specified in the <a
 href="ddsgDocu.html"><code>ddsg</code>-format</a>. A full example can be found
 <a href="example.ddsg">here</a>.
-<li><a href="node_order.html">Input/Output specification</a> with examples. The class that handles 
+<li><a href="node_order.html">Input/Output specification</a> with examples. The class that handles
 the parameters can be found in <code>command/Sort.h</code>.
 <li>Use the program to read the original graph and to output a<span lang="en">
 </span>node order in several formats<span lang="en">.</span></ul>
 
 <h3>&nbsp;</h3>
-<h3><span lang="en">Node Ordering</span> 
+<h3><span lang="en">Node Ordering</span>
 and Contraction</h3>
 <ul>
-<li><span lang="en">If you want to create a new node ordering and a contraction 
-hierarchy in <span lang="en"> 
-		<a href="chDocu.html"><code>ch</code>-format</a></span>.</span><li>Compile the program with <code>USE_CH_EXPAND</code> (in <code>config.h</code>) 
-switched <b>off</b>. If you use the command line argument &quot;<code>-e</code>&quot; then 
-also with <code>COUNT_SHORTCUT_ORIGINAL_EDGES</code> (in <code>config.h</code>) 
+<li><span lang="en">If you want to create a new node ordering and a contraction
+hierarchy in <span lang="en">
+		<a href="chDocu.html"><code>ch</code>-format</a></span>.</span><li>Compile the program with <code>USE_CH_EXPAND</code> (in <code>config.h</code>)
+switched <b>off</b>. If you use the command line argument &quot;<code>-e</code>&quot; then
+also with <code>COUNT_SHORTCUT_ORIGINAL_EDGES</code> (in <code>config.h</code>)
 switched <strong>on</strong>, otherwise <strong>off<span lang="en">, </span></strong>
 <span lang="en">in doubt switch it on</span>.
-<span lang="en">Note: usually an edge needs 8 byte. Each one of those switches 
-adds another 4 byte if switched on.</span><li><span lang="en"><strong>Important 
-note:</strong> It is possible that you have not enough memory if both of the 
-above switches are on, because every edge will need 16 byte. A solution is to 
+<span lang="en">Note: usually an edge needs 8 byte. Each one of those switches
+adds another 4 byte if switched on.</span><li><span lang="en"><strong>Important
+note:</strong> It is possible that you have not enough memory if both of the
+above switches are on, because every edge will need 16 byte. A solution is to
 perform the construction in two steps: first create a node ordering in form of a
-<code>hcn</code>-file (needs 12 byte/node, see above) and then perform a 
-contraction to get the contraction hierarchy in <span lang="en"> 
-		<a href="chDocu.html"><code>ch</code>-format</a></span> (needs 12 byte/node, 
+<code>hcn</code>-file (needs 12 byte/node, see above) and then perform a
+contraction to get the contraction hierarchy in <span lang="en">
+		<a href="chDocu.html"><code>ch</code>-format</a></span> (needs 12 byte/node,
 see below).</span><li>The input graph has to be specified in the <a
 href="ddsgDocu.html"><code>ddsg</code>-format</a>. A full example can be found
 <a href="http://algo2.iti.uka.de/schultes/tmp/USA-road-t.NY.ddsg.gz">here</a>.
-<li><a href="node_order.html">Input/Output specification</a> with examples. The class that handles 
+<li><a href="node_order.html">Input/Output specification</a> with examples. The class that handles
 the parameters can be found in <code>command/Sort.h</code>.
-<li>Use the program to read the original graph and to output a contraction 
+<li>Use the program to read the original graph and to output a contraction
 hierarchy <span lang="en">and</span> a node order in several formats<span lang="en">.</span></ul>
 
 <h3><span lang="en">Contraction</span></h3>
 <ul>
-<li><span lang="en">If you want to create a contraction hierarchy in <span lang="en"> 
-		<a href="chDocu.html"><code>ch</code>-format</a></span> and you already 
-have a node ordering as a <code>hcn</code>-file.</span><li>Compile the program with <code>USE_CH_EXPAND<span lang="en"> 
+<li><span lang="en">If you want to create a contraction hierarchy in <span lang="en">
+		<a href="chDocu.html"><code>ch</code>-format</a></span> and you already
+have a node ordering as a <code>hcn</code>-file.</span><li>Compile the program with <code>USE_CH_EXPAND<span lang="en">
 (in config.h)</span></code> <span lang="en">switched <strong>on</strong> </span>and <code>
-COUNT_SHORTCUT_ORIGINAL_EDGES</code>&nbsp; (in <code>config.h</code>) 
+COUNT_SHORTCUT_ORIGINAL_EDGES</code>&nbsp; (in <code>config.h</code>)
 switched <b>off</b>.
-<span lang="en">Note: usually an edge needs 8 byte. Each one of those switches 
-adds another 4 byte if switched on.</span><li>Make sure that a node ordering has been performed first and a hcn-file is 
-available.<li><a href="contraction.html">Input/Output specification</a> with 
-examples. The class that handles 
+<span lang="en">Note: usually an edge needs 8 byte. Each one of those switches
+adds another 4 byte if switched on.</span><li>Make sure that a node ordering has been performed first and a hcn-file is
+available.<li><a href="contraction.html">Input/Output specification</a> with
+examples. The class that handles
 the parameters can be found in <code>command/Contract.h</code>.
-<li>Use the program to read the node ordering and to create a contraction 
+<li>Use the program to read the node ordering and to create a contraction
 hierarchy.
 </ul>
 

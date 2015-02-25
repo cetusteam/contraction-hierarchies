@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007, 2008 
+/* Copyright (C) 2005, 2006, 2007, 2008
  * Robert Geisberger, Dominik Schultes, Peter Sanders,
  * Universitaet Karlsruhe (TH)
  *
@@ -19,11 +19,11 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-using namespace std;
-
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+
+using namespace std;
 
 #include "config.h"
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
         case 'c':
             m = new command::Construct();
             break;
-            
+
         /* ******************** *
          * transit node routing *
          * ******************** */
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
         case 't':
             m = new command::TNR();
             break;
-            
+
     }
     if (m != NULL) {
         result = m->main(argc, argv);
@@ -83,8 +83,8 @@ int main(int argc, char *argv[])
 
 // doesn't look nice, but required by the compiler (gcc 4)
 const EdgeWeight Weight::MAX_VALUE;
-const EliminationWeight::Type EliminationWeight::MAX_VALUE;
-const EliminationWeight::Type EliminationWeight::MIN_VALUE;
+const EliminationWeight::Type EliminationWeight::MAX_VALUE = __DBL_MAX__;
+const EliminationWeight::Type EliminationWeight::MIN_VALUE = -__DBL_MAX__;
 const EdgeWeight Weight::MAX_INTEGER;
 const int datastr::graph::UpdateableGraph::LOOK_FOR_SECOND_EDGE_BACKWARD;
 const int datastr::graph::UpdateableGraph::LOOK_FOR_SECOND_EDGE_FORWARD;

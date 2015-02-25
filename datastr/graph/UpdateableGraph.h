@@ -19,7 +19,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
- 
+
 #ifndef _DATASTR_GRAPH_UPDATEABLEGRAPH_H
 #define _DATASTR_GRAPH_UPDATEABLEGRAPH_H
 
@@ -40,13 +40,13 @@
  *
  * The adjacency array for each node is organized as follows:
  *      firstEdge
- *          .. 
+ *          ..
  *        (edges having their other incident node in a lower level)
- *          .. 
+ *          ..
  *      firstLevelEdge
- *          .. 
+ *          ..
  *        (edges having their other incident node in the same or higher level)
- *          .. 
+ *          ..
  *      lastEdge
  *
  * Note: This organization is the main difference to the graph datastructure
@@ -65,7 +65,7 @@ public:
     {
     public:
         /** Default Constructor. */
-        UpdNode() : _capacity(0), _target(false), 
+        UpdNode() : _capacity(0), _target(false),
             _level(0), _firstEdge(0), _firstLevelEdgeOffset(0), _lastEdgeOffset(0), _pqElement(0) {}
 
         /**
@@ -116,7 +116,7 @@ public:
         /** Returns the level of this nodes. */
         LevelID level() const { return _level; }
         /** Set the level of the node. A graph->changeNodeLevel(node) may be necessary. */
-        void setLevel(const LevelID k) { 
+        void setLevel(const LevelID k) {
             _level = k;
         }
 
@@ -137,7 +137,7 @@ public:
             assert( increasedCapacity() );
             _capacity--;
         }
-        
+
         /** Returns wheter this node is a target in a local search. */
         bool isTarget() const { return _target; }
         /** Set the target flag for local searches. */
@@ -145,14 +145,14 @@ public:
 
         /** Returns the index of the corresponding elements in the pqueues. */
         NodeID pqElement() const {return _pqElement;}
-    
+
         /** Sets the index of the corresponding elements in the pqueues. */
         void pqElement(const NodeID pqElement) {_pqElement = pqElement;}
-        
+
         /** wheter this node is in the core, only relevant for SearchGraph */
         bool isInCore() const { assert(false); return false; }
         void setInCore(bool inCore) { assert(false); }
-                
+
         // Serialization currently not supported.
         void serialize(ostream& out) const {
             assert(false);
@@ -162,17 +162,17 @@ public:
         void deserialize(istream& in) {
             assert(false);
         }
-        
+
     private:
         /**
          * Stores the 'increased capacity'-flag (bit 1 (= the LSB)),
-         * the target-flag (bit 2) and the node level (bits 3-32), 
+         * the target-flag (bit 2) and the node level (bits 3-32),
          * and the first edge index (bits 6-32).
          */
         unsigned int _capacity:1;
         bool _target:1;
         LevelID _level:30;
-            
+
         EdgeID _firstEdge;
         unsigned int _firstLevelEdgeOffset;
         unsigned int _lastEdgeOffset;
@@ -182,7 +182,7 @@ public:
     /** The node type used in this graph. */
     typedef UpdNode MyNode;
 
-    
+
 public:
     /** Constructor. Builds the graph. */
     UpdateableGraph(vector<CompleteEdge>& edges, const vector<LevelID>& nodeLevels) {
@@ -218,7 +218,7 @@ public:
     EdgeID lastEdge(const NodeID u) const {
         return node(u).lastEdge();
     }
-    
+
     /**
     * Returns the number of edges stored at node u
     * irrespective of the direction.
@@ -259,7 +259,7 @@ public:
         return _edges[e];
     }
 
-    /** Sort edges. */        
+    /** Sort edges. */
     void sortEdges(EdgeID first, EdgeID last)
     {
         assert( first < last );
@@ -285,7 +285,7 @@ public:
      */
     void changeEdgeLevel(const NodeID u, const EdgeID e) {
         assert( (firstEdge(u) <= e) && (e < lastEdge(u)) );
-        
+
         // edge e leads to a lower level and is in the wrong partiton
         if ( node(u).level() > node(edge(e).target()).level() && e >= firstLevelEdge(u) )
         {
@@ -300,11 +300,11 @@ public:
             node(u).setFirstLevelEdge(firstLevelEdge(u)-1);
         }
     }
-    
+
     /**
      * The adjacency array of a node is partitioned into the edges leading
      * to lower levels and the edges leading to the same or higher levels.
-     * This method is called after the level of node u changed. It 
+     * This method is called after the level of node u changed. It
      * ensures the correct partition of the edges if only edges incident
      * to node u may violate it.
      */
@@ -317,7 +317,7 @@ public:
         // swapped.
         EdgeID e = firstEdge(u);
         EdgeID f = lastEdge(u);
-        
+
         if (e < f)
         {
             f--;
@@ -325,14 +325,14 @@ public:
             while (e <= f)
             {
                 // Find a misplaced edge in firstEdge .. firstLevelEdge-1
-                while ( e <= f && node(u).level() > node(edge(e).target()).level() ) 
+                while ( e <= f && node(u).level() > node(edge(e).target()).level() )
                 {
                     // For each edge, check the reverse edge.
                     changeEdgeLevel(edge(e).target(),reverseEdge(u, e));
                     e++;
                 }
                 // Find a misplaced edge in firstLevelEdge .. lastEdge-1
-                while ( e <= f && node(u).level() <= node(edge(f).target()).level() ) 
+                while ( e <= f && node(u).level() <= node(edge(f).target()).level() )
                 {
                     // For each edge, check the reverse edge
                     changeEdgeLevel(edge(f).target(),reverseEdge(u, f));
@@ -341,7 +341,7 @@ public:
                 }
                 if ( f == 0 ) break;
                 // If a misplaced edge in both partitions is found, swap them.
-                if (e < f) 
+                if (e < f)
                 {
                     swap(_edges[e], _edges[f]);
                     changeEdgeLevel(edge(e).target(),reverseEdge(u, e));
@@ -350,7 +350,7 @@ public:
                     f--;
                 }
             }
-            
+
             // Update firstLevelEdge, the partition border.
             if (firstLevelEdge(u) != e) node(u).setFirstLevelEdge(e);
         }
@@ -358,7 +358,7 @@ public:
         assert( firstLevelEdge(u) <= lastEdge(u) );
 
 
-        // Check the result of the above algorithm.            
+        // Check the result of the above algorithm.
         #ifndef NDEBUG
         for ( EdgeID e = firstEdge(u); e < firstLevelEdge(u); e++ )
         {
@@ -388,18 +388,18 @@ public:
         }
         #endif
     }
-    
-    /** 
+
+    /**
      * The adjacency array of a node is partitioned into the edges leading
      * to lower levels and the edges leading to the same or higher levels.
-     * This method is called after the level of node u changed. It 
+     * This method is called after the level of node u changed. It
      * ensures the correct partition of the edges if only the edges leading
-     * to more important nodes incident to node u may violate it and the 
-     * partition is correct for the adjacency array of node u. So only the 
-     * reverse edges between firstLevelEdge .. lastEdge-1 need to be checked. 
-     * This special case occurs during node contraction. Not until after the 
-     * contraction of a node, its level in  the graph datastructure is updated. 
-     * Then, inductive, its own adjacency array is partitioned correct but the 
+     * to more important nodes incident to node u may violate it and the
+     * partition is correct for the adjacency array of node u. So only the
+     * reverse edges between firstLevelEdge .. lastEdge-1 need to be checked.
+     * This special case occurs during node contraction. Not until after the
+     * contraction of a node, its level in  the graph datastructure is updated.
+     * Then, inductive, its own adjacency array is partitioned correct but the
      * adjacency array of its remaining neighbors need an update because from their
      * point of view the edge now leads to a lower level.
      */
@@ -411,8 +411,8 @@ public:
             changeEdgeLevel(edge(e).target(),reverseLevelEdge(u, e));
         }
 
-            
-        // Check the result of the above algorithm.            
+
+        // Check the result of the above algorithm.
         #ifndef NDEBUG
         for ( EdgeID e = firstEdge(u); e < firstLevelEdge(u); e++ )
         {
@@ -456,13 +456,13 @@ public:
         const EdgeID oldFirstEdge = node(u).firstEdge();
         EdgeID newFirstEdge = oldFirstEdge;
         assert( size <= capacity );
-        
+
         // ensure that there is room for the new edge
         if (size == capacity) {
             // Case 1: edge group is full!
             // -> move group to the end of the array, double the capacity
             assert( ! node(u).increasedCapacity() );
-            
+
             // try to reuse edge space
             capacity <<= 1;
 
@@ -508,7 +508,7 @@ public:
     */
     void removeEdge(const NodeID u, const EdgeID e) {
         edge(e).makeClosed(); // mark as 'hole'
-        
+
         if ( e < firstLevelEdge(u) )
         {
             if ( e < firstLevelEdge(u) - 1) swap( _edges[e], _edges[firstLevelEdge(u)-1] );
@@ -520,16 +520,16 @@ public:
             if ( e < lastEdge(u)-1 ) swap( _edges[e], _edges[lastEdge(u)-1] );
         }
         node(u).setLastEdge(lastEdge(u)-1);
-        
+
         // if applicable, set 'increased capacity'
         EdgeID size = degree(u);
         if (size == edgeCapacity(u, size)) {
             node(u).setIncreasedCapacity();
         }
     }
-    
 
-    /** 
+
+    /**
      * Add a shortcut edge at source and target and keeps invariant
      * invariant: for each pair of nodes (u,v) there is at most one edge (u,v)
      * Always the shortest edge is kept.
@@ -539,42 +539,42 @@ public:
      */
     int addShortcutEdge(NodeID u, const Edge& newEdge)
     {
-        return doAddShortcutEdge<false>(u, newEdge);   
+        return doAddShortcutEdge<false>(u, newEdge);
     }
-    /** 
+    /**
      * Same as addShortcutEdge, but only simulate the operation to calculate
      * the edge difference. This is used during node ordering as priority.
      */
     int addShortcutEdgeSimulate(NodeID u, const Edge& newEdge)
     {
-        return doAddShortcutEdge<true>(u, newEdge);   
+        return doAddShortcutEdge<true>(u, newEdge);
     }
-    
-    
+
+
     const static int NOTHING = 0;
     const static int ONE_EDGE = 1;
     const static int TWO_EDGES = 2;
     const static int LOOK_FOR_SECOND_EDGE_FORWARD = -1;
     const static int LOOK_FOR_SECOND_EDGE_BACKWARD = -2;
 
-    /** 
+    /**
      * Add a shortcut edge at source and target and keeps invariant
      * invariant: for each pair of nodes (u,v) there is at most one edge (u,v)
      * This method is used during the construction of a contraction hierarchy
      * to add shortcut edges that represent existing paths in the graph.
      * Always the shortest edge is kept.
-     * Let newEdge = (u,v), the algorithm scans through the adjacency 
+     * Let newEdge = (u,v), the algorithm scans through the adjacency
      * array of u and looks for an edge (u,v) (and (v,u) with bidirectional
-     * flag set). 
+     * flag set).
      * For performance reasons, we only allow shortcut edges having their
-     * source and target node in the same level.     
+     * source and target node in the same level.
      *
      * @param simulateOnly only simulated, return edge difference
-     * @return edge difference, can be 
+     * @return edge difference, can be
      *        -2 two unidirectional edges replaced by a bidirectional
      *         0 could use the position of an existing edge
      *         2 new edge necessary
-     * 
+     *
      */
     template < bool simulateOnly >
     int doAddShortcutEdge(NodeID u, const Edge& newEdge)
@@ -585,7 +585,7 @@ public:
         // accordingly.
         bool forward = true;
         bool backward = newEdge.isBidirected();
-        
+
         // Current state of the search for a parallel edge.
         // NOTHING = no edge found
         // ONE_EDGE = one unidirectional edge found
@@ -597,7 +597,7 @@ public:
         //             bidirectional. Need to check wheter a second unidirectional backward
         //             edge exists.
         int state = NOTHING;
-        
+
         // If we replaced an existing unidirectional edge by a bidirectional edge
         // (state LOOK_FOR_SECOND_EDGE_FORWARD or LOOK_FOR_SECOND_EDGE_BACKWARD)
         // we need to look for a possible second edge. If we found such an edge,
@@ -606,15 +606,15 @@ public:
         // to these edges to perform makeOneWay().
         EdgeID changedEdgeID = SPECIAL_NODEID;
         EdgeID changedReverseEdgeID = SPECIAL_NODEID;
-            
+
         // Only allow shortcut edges between nodes in the same level
         assert( node(u).level() == node(newEdge.target()).level() );
         EdgeID edgeID = firstLevelEdge(u);
         EdgeID lastEdge = this->lastEdge(u);
-        
+
         int result = 0;
-        
-        // Scan through the adjacency array of 
+
+        // Scan through the adjacency array of
         for ( ; edgeID < lastEdge && (forward || backward) && state < TWO_EDGES; edgeID++)
         {
             Edge& edge = this->edge(edgeID);
@@ -630,9 +630,9 @@ public:
                 if (edge.weight() <= newEdge.weight())
                 {
                     forward = forward && !edge.isDirected(0);
-                    backward = backward && !edge.isDirected(1);          
+                    backward = backward && !edge.isDirected(1);
                 }
-                
+
                 // new edge has smaller weight
                 else {
                     if (edge.isBidirected())
@@ -654,7 +654,7 @@ public:
                                 edge.copyShortcutInfo(newEdge, false);
                                 reverseEdge.copyShortcutInfo( newEdge, true);
                             }
-                            
+
                             // replace old edge by new edge
                             forward = false;
                             backward = false;
@@ -675,12 +675,12 @@ public:
                             // => old edge becomes forward
                             if ( !simulateOnly )
                             {
-                                edge.makeOneWay(0);   
+                                edge.makeOneWay(0);
                                 reverseEdge.makeOneWay(1);
                             }
                         }
                     }
-                    
+
                     // old edge unidirectional
                     else
                     {
@@ -690,7 +690,7 @@ public:
                             // new edge covers all directions that the old edge covers
                             EdgeID reverseEdgeID = reverseLevelEdge(u, edgeID);
                             Edge& reverseEdge = this->edge(reverseEdgeID);
-                            
+
                             if ( !simulateOnly )
                             {
                                 edge.setWeight(newEdge.weight());
@@ -703,15 +703,15 @@ public:
                                 edge.copyShortcutInfo(newEdge, false);
                                 reverseEdge.copyShortcutInfo( newEdge, true);
                             }
-                            
+
                             if (forward && backward)
                             {
                                 // old edge is not bidirectional, new edge is bidirectional
-                                if (state == ONE_EDGE) 
+                                if (state == ONE_EDGE)
                                 {
                                     // There could be another old edge in the opposite
                                     // direction. We need to look for it.
-                                    state = edge.isDirected(0) 
+                                    state = edge.isDirected(0)
                                         ? LOOK_FOR_SECOND_EDGE_BACKWARD
                                         : LOOK_FOR_SECOND_EDGE_FORWARD;
                                     changedEdgeID = edgeID;
@@ -727,12 +727,12 @@ public:
                             // replace old edge by new edge, no need to add a new edge
                             forward = false;
                             backward = false;
-                        }  
+                        }
                     }
                 }
             }
         }
-        
+
         // If a unidirectional edge was replaced by a bidirectional one
         // check for unidirectional edge in other direction.
         if ( state == LOOK_FOR_SECOND_EDGE_FORWARD || state == LOOK_FOR_SECOND_EDGE_BACKWARD )
@@ -745,7 +745,7 @@ public:
                 {
                     assert( state != LOOK_FOR_SECOND_EDGE_FORWARD || ( edge.isDirected(0) && !edge.isDirected(1) ) );
                     assert( state != LOOK_FOR_SECOND_EDGE_BACKWARD || ( edge.isDirected(1) && !edge.isDirected(0) ) );
-                    
+
                     // this one is shorter than our new edge, reduce our edge to one-way (unidirectional)
                     if (edge.weight() < newEdge.weight())
                     {
@@ -783,7 +783,7 @@ public:
             }
         }
 
-        // A new edge is necessary because there were no usable existing edges with 
+        // A new edge is necessary because there were no usable existing edges with
         // same source and target.
         if (forward || backward)
         {
@@ -797,10 +797,10 @@ public:
             }
             result += 2;
         }
-        
+
         return result;
     }
-    
+
 
     /**
     * Returns the ID of the edge (v,u) that corresponds to the
@@ -817,7 +817,7 @@ public:
             if (edge(f).isReverse(u, edge(e))) return f;
             if (f == 0) break;
         }
-        
+
         // ERROR if no reverse edge is found
         cerr << "DEBUG: UpdateableGraph::reverseEdge" << endl
              << "       from " << u << " " << edge(e) << endl;
@@ -841,7 +841,7 @@ public:
             if (edge(f).isReverse(u, edge(e))) return f;
             if (f == 0) break;
         }
-        
+
         // ERROR if no reverse edge is found
         cerr << "DEBUG: UpdateableGraph::reverseLevelEdge" << endl
              << "       from " << u << " " << edge(e) << " [" << edge(e).type()  << "]" << endl;
@@ -873,7 +873,7 @@ public:
     /*
     vector<char>& reliableLevels() {return _reliableLevels;}
     */
-    
+
 
     // Dynamization currently not supported.
     /** Returns the reliable level of the specified node. */
@@ -906,7 +906,7 @@ public:
             capacity = edgeCapacity(capacity);
             futureEdgeArraySize += capacity;
         }
-        
+
         // ... and write it.
         writePrimitive(out, futureEdgeArraySize);
 
@@ -916,7 +916,7 @@ public:
             for (EdgeID e = firstEdge(u); e < last; e++) edge(e).serialize(out);
         }
         // end of edge serialization
-        
+
         VectorSerializer< NodeID, NodeID >::serialize(out, _mapExtToIntNodeIDs);
         VERBOSE( cout << "done." << endl );
         VERBOSE( printMemoryUsage(cout) );
@@ -931,9 +931,9 @@ public:
         NodeID n;
         readPrimitive(in, n);
         _nodes.resize(n);
-        
+
         VectorSerializer< UpdNode, NodeID, ComplexSerializer<UpdNode> >::deserialize(in, _nodes);
-        
+
         EdgeID m;
         readPrimitive(in, m);
         // reserve some overhead for additional edges (but not too much, a factor of two would waste too much memory)
@@ -945,7 +945,7 @@ public:
         for (NodeID u = 0; u < noOfNodes(); u++) {
             node(u).setFirstEdge(currentFirstEdge);
             EdgeID last = lastEdge(u);
-            for (EdgeID e = firstEdge(u); e < last; e++) 
+            for (EdgeID e = firstEdge(u); e < last; e++)
             {
                 edge(e).deserialize(in);
             }
@@ -995,7 +995,7 @@ public:
         return true;
     }
 
-    
+
 private:
     vector<UpdNode> _nodes;
 
@@ -1029,7 +1029,7 @@ private:
         if (node(u).increasedCapacity()) capacity <<= 1;
         return capacity;
     }
-    
+
     /**
     * To the last edge group in the edge array with size s and
     * capacity c, we add (c - s) 'holes'.
@@ -1040,7 +1040,7 @@ private:
             _edges.push_back(Edge(SPECIAL_NODEID, Weight::MAX_VALUE, false, false, false));
         }
     }
-    
+
     /**
      * Used during the initial construction of the graph. Sort the list of edges
      * after source,target and finally level.
@@ -1050,12 +1050,12 @@ private:
         UpdateableGraph* graph;
         bool operator()(const CompleteEdge& a, const CompleteEdge& b)
         {
-            return (a.source() < b.source() 
+            return (a.source() < b.source()
                 || (a.source() == b.source() && graph->node(a.target()).level() < graph->node(b.target()).level()));
         }
     };
-    
-    
+
+
     /**
     * Initializes this UpdateableGraph from a given list of edges and node levels.
     * Note that the overlay graph hierarchy is constructed later.
@@ -1106,7 +1106,7 @@ private:
             node(u).setIncreasedCapacity();
             appendClosedEdges(offset, edgeCapacity(u, offset));
         }
-        
+
         assert( checkReverseGraphExists() );
 
         VERBOSE( printMemoryUsage(cout) );
@@ -1143,12 +1143,12 @@ private:
     /** Prints the total memory usage of this UpdateableGraph. */
     void printMemoryUsage(ostream& out) const {
         out << "** memory usage on hard disk [MB (bytes per node)] **" << endl;
-        
+
         unsigned int memoryTotal = 0;
         memoryTotal += printMemoryUsage(out, "edges", noOfExistingEdges() * sizeof(Edge));
         memoryTotal += printMemoryUsage(out, "node data", _nodes.size() * sizeof(UpdNode));
         memoryTotal += printMemoryUsage(out, "node ID mapping", _mapExtToIntNodeIDs.size() * sizeof(NodeID));
-        
+
         printMemoryUsage(out, "TOTAL", memoryTotal);
         out << endl;
     }

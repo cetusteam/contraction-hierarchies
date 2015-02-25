@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007, 2008 
+/* Copyright (C) 2005, 2006, 2007, 2008
  * Robert Geisberger, Dominik Schultes, Peter Sanders,
  * Universitaet Karlsruhe (TH)
  *
@@ -38,14 +38,14 @@ class Weight
 public:
     static const SignedEdgeWeight SIGNED_MIN_VALUE = -__INT_MAX__ - 1;
     static const EdgeWeight SIGNED_MAX_VALUE = (EdgeWeight)__INT_MAX__;
-    
+
     /**
      * max value of an edge weight (due to the chosen type)
      * (used to represent 'infinity')
      */
-    static const EdgeWeight MAX_VALUE = __INT_MAX__ * 2U + 1; 
+    static const EdgeWeight MAX_VALUE = __INT_MAX__ * 2U + 1;
     static const EdgeWeight MIN_VALUE = 0;
-    
+
     /**
      * max integer value of an edge weight which is actually used;
      * the highest values can be used as special values (flags);

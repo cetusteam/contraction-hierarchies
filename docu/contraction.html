@@ -17,9 +17,9 @@
 <p>Contraction Hierarchies</p>
 <h1>Contraction</h1>
 <h3>Input/Output Specification</h3>
-<p>The program is completely controlled by command line arguments. Not only the 
-appearance of an argument is important but also the order of the arguments. To 
-create a contraction hierarchy using an existing node ordering, every call starts with 
+<p>The program is completely controlled by command line arguments. Not only the
+appearance of an argument is important but also the order of the arguments. To
+create a contraction hierarchy using an existing node ordering, every call starts with
 &quot;<code>./main -c</code>&quot;.</p>
 <p><span lang="en">The following arguments are likely to be used:</span></p>
 <table style="width: 100%">
@@ -40,31 +40,31 @@ create a contraction hierarchy using an existing node ordering, every call start
 	</tr>
 	<tr>
 		<td><span lang="en"><code>-l</code></span></td>
-		<td><span lang="en">log file, if &quot;<code>-l x</code>&quot; then the file name 
+		<td><span lang="en">log file, if &quot;<code>-l x</code>&quot; then the file name
 		depends on chosen parameters</span></td>
 		<td><span lang="en"><code>-l x</code></span></td>
 	</tr>
 	<tr>
 		<td><span lang="en"><code>-z</code></span></td>
-		<td><span lang="en">export search graph to binary <code>sgr</code>-format,&nbsp; if &quot;<code>-Z 
+		<td><span lang="en">export search graph to binary <code>sgr</code>-format,&nbsp; if &quot;<code>-Z
 		x</code>&quot;, then the file name depends on chosen parameters</span></td>
 		<td><span lang="en"><code>-z x</code></span></td>
 	</tr>
 	<tr>
 		<td><span lang="en"><code>-C</code></span></td>
-		<td><span lang="en">export contraction hierarchy to binary 
-		<a href="chDocu.html"><code>ch</code>-format</a>,&nbsp; 
+		<td><span lang="en">export contraction hierarchy to binary
+		<a href="chDocu.html"><code>ch</code>-format</a>,&nbsp;
 		if &quot;<code>-C x</code>&quot;, then the file name depends on chosen parameters<span lang="en"><br />
-		Note: to use this parameter, <code>USE_CH_EXPAND</code> (in <code>config.h</code>) 
+		Note: to use this parameter, <code>USE_CH_EXPAND</code> (in <code>config.h</code>)
 		needs to be switched <b>o</b><strong>n</strong>.</span></span></td>
 		<td><span lang="en"><code>-C x</code></span></td>
 	</tr>
 </table>
-<p lang="en"><span lang="en">Additional, the limitations to the local searches 
+<p lang="en"><span lang="en">Additional, the limitations to the local searches
 need to be defined.
-However only experienced users should modify the arguments because the 
+However only experienced users should modify the arguments because the
 description may be misleading or even in some sense wrong. Therefore
-we propose a predefined set 
+we propose a predefined set
 of parameters below in the examples.</span></p>
 <table style="width: 100%">
 	<tr>
@@ -79,7 +79,7 @@ of parameters below in the examples.</span></p>
 	</tr>
 	<tr>
 		<td><span lang="en"><code>-k</code></span></td>
-		<td><span lang="en">hop limits, comma-separated list, alternating 
+		<td><span lang="en">hop limits, comma-separated list, alternating
 		between hop limit and avg degree limit to switch</span></td>
 		<td><span lang="en"><code>-k 1,3.3,2,10,3,10,5</code></span></td>
 	</tr>
@@ -91,14 +91,14 @@ of parameters below in the examples.</span></p>
 	</table>
 
 <h4 lang="en"><span lang="en">Examples</span></h4>
-<p lang="en"><span lang="en">economical variant: fast preprocessing, medium 
+<p lang="en"><span lang="en">economical variant: fast preprocessing, medium
 space consumption and query times</span></p>
-<p lang="en" class="style1"><code>./main -c -f eur.ddsg -h 
-exact-190-1-0-120-0-0-0-0-1000-0-0-0-0-1-3.3-2-10-3-10-5-0-0-0-0-0-1-70.hcn -k 
+<p lang="en" class="style1"><code>./main -c -f eur.ddsg -h
+exact-190-1-0-120-0-0-0-0-1000-0-0-0-0-1-3.3-2-10-3-10-5-0-0-0-0-0-1-70.hcn -k
 1,3.3,2,10,3,10,5 -C x</code></p>
-<p lang="en">&nbsp;<span lang="en">aggressive variant: medium preprocessing, low 
+<p lang="en">&nbsp;<span lang="en">aggressive variant: medium preprocessing, low
 space consumption and query times</span></p>
-<p lang="en" class="style1"><code>./main -c -f eur.ddsg -h 
+<p lang="en" class="style1"><code>./main -c -f eur.ddsg -h
 exact-190-1-0-0-0-0-1000-0-1000-0-0-0-0-0-0-60-145-0-1-70.hcn -C x</code></p>
 
 </body>

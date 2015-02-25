@@ -43,7 +43,7 @@ class Percent
  private:
     typedef int percentInt;
     typedef unsigned int valueInt;
-    
+
  public:
     /**
      * Constructor.
@@ -65,7 +65,7 @@ class Percent
         _reverse = reverse;
         _lastPercent = 0;
         _step = step;
-        
+
         if (reverse) _nextThreshold = _maxValue - _intervalPercent;
     }
 
@@ -76,7 +76,7 @@ class Percent
                 _nextThreshold += _intervalPercent;
                 printPercent( currentValue / (double)_maxValue * 100 );
             }
-            if (currentValue + 1 == _maxValue) finish();            
+            if (currentValue + 1 == _maxValue) finish();
         }
         else {
             if (currentValue <= _nextThreshold) {
@@ -85,14 +85,14 @@ class Percent
             }
         }
     }
-        
+
  private:
     valueInt _maxValue;
     valueInt _intervalPercent;
     valueInt _nextThreshold;
     bool _reverse;
     percentInt _lastPercent;
-    percentInt _step;    
+    percentInt _step;
 
     /** Displays the new progress. */
     void printPercent(double percent) {

@@ -19,7 +19,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
- 
+
 #ifndef _DATASTR_GRAPH_SEARCHGRAPH_H
 #define _DATASTR_GRAPH_SEARCHGRAPH_H
 
@@ -27,7 +27,7 @@
 #include "UpdateableGraph.h"
 
 namespace datastr { namespace graph {
-    
+
 /**
  * Search graph node order. A good node order can speedup the query.
  */
@@ -35,10 +35,10 @@ enum SearchGraphNodeOrder
 {
     // original node id
     SGNO_ORIGINAL,
-    
+
     // level id (distinct level for each node)
     SGNO_LEVEL,
-    
+
     // Special order, large partitions according to level
     // order according to original node id within level.
     SGNO_LOGLEVEL_ORIGINAL,
@@ -49,7 +49,7 @@ enum SearchGraphNodeOrder
  * for queries, the edges incident to an node with the other edge in the same original
  * higher level. Its interface is closly related to the Static/DynamicGraph.
  * Internally, an adjacency array is kept.
- */  
+ */
 class SearchGraph
 {
 public:
@@ -74,9 +74,9 @@ public:
 
         /** Returns the index of the corresponding elements in the pqueues. */
         NodeID pqElement() const {return _pqElement & ((1U<<31)-1);}
-    
+
         /** Sets the index of the corresponding elements in the pqueues. */
-        void pqElement(const NodeID pqE) 
+        void pqElement(const NodeID pqE)
         {
             assert( pqE < ((unsigned int)1<<31) );
             _pqElement = (pqE | (_pqElement & (1<<31)));
@@ -91,16 +91,16 @@ public:
             _pqElement = (pqElement() | (inCore << 31));
         }
 
-        /** 
-         * Serialize the node. 
+        /**
+         * Serialize the node.
          * Warning: it depends on the node representation in the main memory.
          */
         void serialize(ostream& out) const {
             out.write((char*)this,sizeof(SearchNode)/sizeof(char));
         }
 
-        /** 
-         * Deserialize the node. 
+        /**
+         * Deserialize the node.
          * Warning: it depends on the node representation in the main memory.
          */
         void deserialize(istream& in) {
@@ -110,7 +110,7 @@ public:
         /** Not used. Provides same interface as the UpdateableGraph. */
         bool isTarget() const { assert(false); return false; }
 
-        
+
     private:
         EdgeID _firstLevelEdge;
         NodeID _pqElement;
@@ -119,13 +119,13 @@ public:
     /** The node type used in this graph. */
     typedef SearchNode MyNode;
 
-    
+
 public:
     /** Constructor. Builds the graph. */
     SearchGraph(UpdateableGraph* updGraph, const SearchGraphNodeOrder nodeOrder) {
         construct(updGraph, nodeOrder);
     }
-    
+
     /** Constructor. Builds the graph. */
     SearchGraph(istream& in)
     {
@@ -136,8 +136,8 @@ public:
     /** Returns the number of nodes. */
     NodeID noOfNodes() const {return (_nodes.size()-1) /*substract dummy node*/ ;}
 
-    /** 
-     * Returns the number of edges that memory has been allocated for. 
+    /**
+     * Returns the number of edges that memory has been allocated for.
      * For a search graph that is the sam as the number of nodes since
      * there are no holes in the edge array.
      */
@@ -160,7 +160,7 @@ public:
         assert( u < noOfNodes() );
         return _nodes[u+1].firstLevelEdge();
     }
-    
+
     /**
     * Returns the number of edges stored at node u
     * irrespective of the direction.
@@ -219,7 +219,7 @@ public:
         // edges
         VectorSerializer< Edge, EdgeID, ComplexSerializer<Edge> >::serialize(out, _edges);
 
-        // node-id mapping        
+        // node-id mapping
         VectorSerializer< NodeID, NodeID >::serialize(out, _mapExtToIntNodeIDs);
 
         VERBOSE( cout << "done." << endl );
@@ -232,7 +232,7 @@ public:
 
         // nodes
         VectorSerializer< SearchNode, NodeID, ComplexSerializer<SearchNode> >::deserialize(in, _nodes);
-        
+
         // edges
         VectorSerializer< Edge, NodeID, ComplexSerializer<Edge> >::deserialize(in, _edges);
 
@@ -241,7 +241,7 @@ public:
 
         VERBOSE( cout << noOfNodes() << " " << noOfEdges() << endl; )
         VERBOSE( cout << "done." << endl );
-    }        
+    }
 
 private:
     vector<MyNode> _nodes;
@@ -261,8 +261,8 @@ private:
             return (a.second < b.second);
         }
     };
-    
-    
+
+
     /**
     * Construct the SearchGraph from an UpdateableGraph. Only edges having their
     * other incident edge in the same or higher level are kept because only these
@@ -288,9 +288,9 @@ private:
                 VERBOSE( cout << "Node-order: unknown (" << nodeOrder << ")" << endl; )
                 break;
         }
-            
 
-        // Store the pair <node,level of node> in an array. 
+
+        // Store the pair <node,level of node> in an array.
         vector< pair<LevelID, NodeID> > levelNodes(updGraph->noOfNodes());
         for (NodeID u = 0; u < updGraph->noOfNodes(); u++) {
             levelNodes[u].first = updGraph->node(u).level();
@@ -301,8 +301,8 @@ private:
         {
             // sort levels after level-id
             sort( levelNodes.begin(), levelNodes.end() );
-    
-    
+
+
             // If a new node order is requested.
             if ( nodeOrder == SGNO_LOGLEVEL_ORIGINAL )
             {
@@ -313,24 +313,24 @@ private:
                 NodeID border = step;
                 LevelID partition = 0;
                 CompareSecond<LevelID,NodeID> comp;
-                
+
                 while (border <= levelNodes.size() && partition < levels)
                 {
                     LevelID exactLevel = levelNodes[border-1].first;
-                    
+
                     // do not split existing levels
                     while (border < levelNodes.size() && levelNodes[border].first == exactLevel) border++;
-        
-                    // sort by node id within the partition            
+
+                    // sort by node id within the partition
                     sort( levelNodes.begin() + oldBorder, levelNodes.begin() + border, comp );
-        
+
                     if (border == levelNodes.size()) break;
                     partition++;
                     oldBorder = border;
-        
+
                     step /= 2;
                     if (step > 0)
-                    {                
+                    {
                         border = border + step;
                         if ( border >levelNodes.size() ) border = levelNodes.size();
                     }
@@ -342,13 +342,13 @@ private:
             }
 
         }
-        
+
         // node-id mapping
         _mapExtToIntNodeIDs.resize(updGraph->noOfNodes());
         for (NodeID i = 0; i < levelNodes.size(); i++) {
             _mapExtToIntNodeIDs[levelNodes[i].second] = i;
         }
-                
+
 
         // build adjacency array
         _nodes.resize(levelNodes.size()+1);
@@ -357,22 +357,22 @@ private:
         {
             EdgeID iFirstEdge = _edges.size();
             _nodes[i].setFirstLevelEdge(iFirstEdge);
-            
+
             // a node is in the core level if the level == n
             _nodes[i].setInCore(levelNodes[i].first == (LevelID)updGraph->noOfNodes());
             if (_nodes[i].isInCore()) noOfNodesInCore++;
-            
-            NodeID u = levelNodes[i].second; 
+
+            NodeID u = levelNodes[i].second;
             EdgeID lastEdge = updGraph->lastEdge(u);
             for (EdgeID e = updGraph->firstLevelEdge(u); e < lastEdge; e++) {
                 const Edge& edge = updGraph->edge(e);
-                
+
                 // do not add witness shortcuts
                 if ( edge.type() == EDGE_TYPE_WITNESS_SHORTCUT ) continue;
-                    
+
                 assert( updGraph->node(edge.target()).level() >= updGraph->node(u).level() );
                 assert( edge.target() < updGraph->noOfNodes() );
-                
+
                 _edges.push_back(Edge(mapExtToIntNodeID(edge.target()),
                                       edge.weight(),
                                       edge.type(),
@@ -386,8 +386,8 @@ private:
         }
         // guard border node at the end because if
         // lastEdge(n-1) is accessed, firstLevelEdge(n) is returned.
-        _nodes[levelNodes.size()].setFirstLevelEdge(_edges.size()); 
-        
+        _nodes[levelNodes.size()].setFirstLevelEdge(_edges.size());
+
         VERBOSE( printMemoryUsage(cout); )
         VERBOSE( cout << "#core nodes: " << noOfNodesInCore << endl; )
 
@@ -410,12 +410,12 @@ private:
     /** Prints the total memory usage of this UpdateableGraph. */
     void printMemoryUsage(ostream& out) const {
         out << "** memory usage on hard disk [MB (bytes per node)] **" << endl;
-        
+
         unsigned int memoryTotal = 0;
         memoryTotal += printMemoryUsage(out, "edges", noOfEdges() * sizeof(Edge));
         memoryTotal += printMemoryUsage(out, "node data", _nodes.size() * sizeof(SearchNode));
         memoryTotal += printMemoryUsage(out, "node ID mapping", _mapExtToIntNodeIDs.size() * sizeof(NodeID));
-        
+
         printMemoryUsage(out, "TOTAL", memoryTotal);
         out << endl;
     }

@@ -30,7 +30,7 @@
  * which is provided by the application (which uses the heap) and an internal Key,
  * which is used inside the heap. The ExternalKey is always a part of the internal Key.
  * A "key extractor" extracts the ExternalKey out of the internal Key.
- * 
+ *
  * In the simple case of a BinaryHeap without the FIFO property, the internal Key just
  * corresponds to the ExternalKey. Thus, the SimpleKeyExtractor just returns the
  * given internal Key as the ExternalKey.
@@ -50,7 +50,7 @@ public:
  * @param ExternalKey the type of the external key (see SimpleKeyExtractor)
  * @param MetaExtKey class that provides data about the external key, e.g. the max value
  * @param Data the type of the application-specific data that is associated with this element
- * @param Count the type of the counter that counts the number of heap elements / 
+ * @param Count the type of the counter that counts the number of heap elements /
  *              the number of heap operations
  */
 template < typename ExternalKey,
@@ -62,47 +62,47 @@ class BinaryHeapElement
 public:
     /** Constructs a DUMMY element. */
     BinaryHeapElement() : _key(MetaExtKey::MAX_VALUE), _index(0) {}
-            
+
     /**
      * Constructor.
      * @param key key of the new element
      * @param index index of the new element within the heap
      */
     BinaryHeapElement(ExternalKey key, Count index) : _key(key), _index(index) {}
-    
-    
+
+
     /** Returns the external key of this element. */
     ExternalKey key() const {return _key;}
-    
+
     /** Sets the external key of this element. */
     void key(ExternalKey newKey) {_key = newKey;}
 
     bool isDummy() const {return key() == MetaExtKey::MAX_VALUE;}
-    
-    
+
+
     /** Returns a reference to the application-specific data object of this element. */
     Data& data() {return _data;}
-    
+
     /** Returns a reference to the application-specific data object of this element. */
     const Data& data() const {return _data;}
-    
-    
+
+
     /** Marks that this element has been deleted from the heap. */
     void markDeleted() {index(0);}
-    
+
     /** Returns true iff this element has been deleted from the heap. */
     bool hasBeenDeleted() const {return (_index==0);}
 
-    
+
     /** Returns this element's index within the heap. */
     Count index() const {return _index;}
-    
+
     /** Sets this element's index within the heap. */
     void index(Count newIndex) {_index = newIndex;}
-    
+
 private:
     /** The external key of this element. */
-    ExternalKey _key;    
+    ExternalKey _key;
     /** The application-specific data that is associated with this element. */
     Data _data;
     /**
@@ -117,7 +117,7 @@ private:
  * @param ExternalKey the type of the external key (see SimpleKeyExtractor)
  * @param MetaExtKey class that provides data about the external key, e.g. the max value
  * @param Data the type of the application-specific data that is associated with this element
- * @param Count the type of the counter that counts the number of heap elements / 
+ * @param Count the type of the counter that counts the number of heap elements /
  *              the number of heap operations
  * @param Key the type of the internal key (see SimpleKeyExtractor)
  * @param KeyExtractor the "key extractor" that is used (see SimpleKeyExtractor)
@@ -133,9 +133,9 @@ class BinaryHeap
 public:
     /** The type of the elements stored in this heap. */
     typedef BinaryHeapElement<ExternalKey, MetaExtKey, Data, Count> PQElement;
-    
+
     typedef Data PQData;
-    
+
     /** Constructor. */
     BinaryHeap() {
         insertDummy();
@@ -144,24 +144,24 @@ public:
     }
 
     /** Returns the size of this heap (= the number of elements). */
-    Count size() const { 
+    Count size() const {
         return _heap.size()-1; // subtract dummy element (index 0)
     }
-    
+
     void reserve( size_t n )
     {
         _elements.reserve(n+1);
         _heap.reserve(n+1);
     }
-                            
+
     /** Returns true iff the heap is empty. */
     bool empty() const { return (size() == 0); }
 
-    /** 
+    /**
      * Returns the (external) key of the minimum element in this heap
      * or the maximum value of the ExternalKey data type iff the heap is empty.
      */
-    ExternalKey min() const {   
+    ExternalKey min() const {
         if (empty()) return MetaExtKey::MAX_VALUE;
         return KeyExtractor::key(_heap[1].second);
     }
@@ -175,22 +175,22 @@ public:
         Count index = _heap.size();
         _elements.push_back( PQElement(KeyExtractor::key(key), index) );
         _heap.push_back(IndexKey(element,key));
-        upheap(index);        
+        upheap(index);
         return element;
     }
-    
+
     /** Replaces a dummy element and inserts the actual element into the heap. */
-    void insert(Key key, Count elementIndex) {          
+    void insert(Key key, Count elementIndex) {
         PQElement& element = _elements[elementIndex];
         Count index = _heap.size();
-        element.key(KeyExtractor::key(key));        
+        element.key(KeyExtractor::key(key));
         element.index(index);
         _heap.push_back(IndexKey(elementIndex,key));
         upheap(index);
     }
-    
+
     /** Adds a dummy element, which is NOT inserted into the heap, yet. */
-    void insertDummy() {        
+    void insertDummy() {
         _elements.push_back( PQElement() );
     }
 
@@ -205,14 +205,14 @@ public:
         assert( empty() );
         _elements.resize(number);
     }
-    
+
     bool isDummy(Count element) const {
         return (_elements[element].isDummy());
     }
-    
+
     /** Returns a reference to the elements. */
     vector<PQElement>& elements() {return _elements;}
-    
+
     /** Returns a reference to the elements. */
     const vector<PQElement>& elements() const {return _elements;}
 
@@ -240,19 +240,19 @@ public:
         if (size() > 1) {
             // downheap:
             // Move the element at the top downwards
-            // until the heap condition is restored.            
-            
+            // until the heap condition is restored.
+
             Key k = _heap[index].second;
             Count nextIndex = 2*index;
             while (nextIndex < _heap.size()) {
-                nextIndex += 
+                nextIndex +=
                     ((nextIndex+1 < _heap.size()) &&
                     (_heap[nextIndex].second > _heap[nextIndex+1].second));
-                
+
                 assert( _elements[_heap[nextIndex].first].key() == KeyExtractor::key(_heap[nextIndex].second) );
-                
+
                 if (k <= _heap[nextIndex].second) break;
-                
+
                 _heap[index] = _heap[nextIndex];
                 _elements[_heap[nextIndex].first].index(index);
                 index = nextIndex;
@@ -260,11 +260,11 @@ public:
             }
             _heap[index].first = droppingElement;
             _heap[index].second = k;
-            
+
             // end of downheap
         }
         _elements[droppingElement].index(index);
-        
+
         _elements[element].markDeleted();
         COUNTING( counter.incDouble(COUNT_DEL_MIN) );
         return element;
@@ -276,7 +276,7 @@ public:
      * @return the index of the deleted element
      */
     Count deleteArbitrary() {
-        assert( ! empty() );         
+        assert( ! empty() );
         Count element = _heap.back().first;
         _heap.pop_back();
         _elements[element].markDeleted();
@@ -291,13 +291,13 @@ public:
         Count index = _elements[element].index();
         assert( index < _heap.size() );
         assert( _heap[index].first == element );
-        
+
         _elements[element].key(KeyExtractor::key(newKey));
         _heap[index].second = newKey;
         downheap(index);
         COUNTING( counter.incDouble(COUNT_INCR_KEY) );
     }
-    
+
     /**
      * Decreases the key of the given element:
      * sets the key to the given value.
@@ -306,13 +306,13 @@ public:
         Count index = _elements[element].index();
         assert( index < _heap.size() );
         assert( _heap[index].first == element );
-        
+
         _elements[element].key(KeyExtractor::key(newKey));
         _heap[index].second = newKey;
         upheap(index);
         COUNTING( counter.incDouble(COUNT_DECR_KEY) );
     }
-    
+
     /**
      * Updates the key of the given element:
      * sets the key to the given value.
@@ -327,7 +327,7 @@ public:
         _elements[element].key(KeyExtractor::key(newKey));
         _heap[index].second = newKey;
         if (newKey < oldKey)
-        {        
+        {
             upheap(index);
             COUNTING( counter.incDouble(COUNT_DECR_KEY) );
         }
@@ -342,12 +342,12 @@ public:
         _elements.clear();
         insertDummy();
     }
-    
+
     /**
      * For debugging purpose.
      * @return _heap is still a binary heap.
      */
-    bool checkHeapProperty() 
+    bool checkHeapProperty()
     {
         bool result = true;
         for ( unsigned int i = 2; i < _heap.size(); i++ )
@@ -358,15 +358,15 @@ public:
                 cerr << " > " << _heap[i].second << " = _heap[" << i << "]" << endl;
                 result = false;
                 break;
-            }            
+            }
         }
         return result;
     }
-    
-    
+
+
 private:
     typedef pair<Count, Key> IndexKey;
-    
+
     /**
      * The elements of this heap.
      * The order corresponds to the order of insertion and
@@ -381,25 +381,25 @@ private:
      * can be used to mark elements that have not been inserted into the heap.
      */
     vector<PQElement> _elements;
-    
-    /** 
+
+    /**
      * "Pointers" (first) to the elements of this heap in the right heap order.
      * In addition (second), the internal key of the corresponding element.
      * The first element (index 0) is a dummy element so that the index 0
      * can be used to mark elements that have been deleted from the heap.
      */
     vector<IndexKey> _heap;
-    
-    
-    
 
-    /** 
+
+
+
+    /**
      * Move the element with the given index upwards
      * until the heap condition is restored.
      */
     void upheap(Count index) {
         Count risingElement = _heap[index].first;
-        Key k = _heap[index].second;        
+        Key k = _heap[index].second;
         while (_heap[index / 2].second > k) {
             assert( index > 1 );
             assert( _elements[_heap[index / 2].first].key() == KeyExtractor::key(_heap[index / 2].second) );
@@ -412,15 +412,15 @@ private:
         _elements[risingElement].index(index);
     }
 
-    /** 
+    /**
      * Move the element with the given index downwards.
-     * until the heap condition is restored. 
+     * until the heap condition is restored.
      */
     void downheap(Count index) {
         Count descendingElement = _heap[index].first;
-        Key k = _heap[index].second;        
+        Key k = _heap[index].second;
         Count maxIndex;
-        if (2*index < _heap.size() && _heap[2*index].second < k) 
+        if (2*index < _heap.size() && _heap[2*index].second < k)
         {
             maxIndex = 2*index;
         }
@@ -428,9 +428,9 @@ private:
         {
             maxIndex = index;
         }
-        if ((2*index + 1) < _heap.size() && _heap[2*index+1].second < _heap[maxIndex].second) 
+        if ((2*index + 1) < _heap.size() && _heap[2*index+1].second < _heap[maxIndex].second)
         {
-            maxIndex = 2*index + 1;   
+            maxIndex = 2*index + 1;
         }
         while (maxIndex != index) {
             assert( index >= 1 );
@@ -440,7 +440,7 @@ private:
             index = maxIndex;
             _heap[index].second = k;
 
-            if (2*index < _heap.size() && _heap[2*index].second < k) 
+            if (2*index < _heap.size() && _heap[2*index].second < k)
             {
                 maxIndex = 2*index;
             }
@@ -448,9 +448,9 @@ private:
             {
                 maxIndex = index;
             }
-            if ((2*index + 1) < _heap.size() && _heap[2*index+1].second < _heap[maxIndex].second) 
+            if ((2*index + 1) < _heap.size() && _heap[2*index+1].second < _heap[maxIndex].second)
             {
-                maxIndex = 2*index + 1;   
+                maxIndex = 2*index + 1;
             }
         }
         _heap[index].first = descendingElement;

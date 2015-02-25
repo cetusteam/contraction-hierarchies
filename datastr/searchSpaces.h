@@ -41,7 +41,7 @@
 class SearchSpaces
 {
 private:
-    
+
     /**
     * While a search from some node x is performed, at each encountered node u
     * we add a SearchSpaceEntry containing the origin x and the distance from x to u.
@@ -80,17 +80,17 @@ private:
         NodeID origin() const {return _origin;}
 
         EdgeWeight dist() const {return _dist;}
-    
+
         void serialize(ostream& out) const {
             writePrimitive(out, _origin);
             writePrimitive(out, _dist);
         }
-    
+
         void deserialize(istream& in) const {
             readPrimitive(in, _origin);
             readPrimitive(in, _dist);
         }
-        
+
     private:
         SSENodeID _origin;
         SSEEdgeWeight _dist;
@@ -105,11 +105,11 @@ private:
     {
     private:
         typedef SearchSpaceEntry<SSENodeID_type, SSEEdgeWeight_type> Super;
-        
+
     public:
         typedef SSENodeID_type SSENodeID;
         typedef SSEEdgeWeight_type SSEEdgeWeight;
-    
+
         /** Used to group a vector of entries by node ID. */
         bool operator< (const CompleteSearchSpaceEntry& e) const {
             return (nodeID() < e.nodeID());
@@ -126,9 +126,9 @@ private:
        */
         CompleteSearchSpaceEntry(NodeID u, SSENodeID o, SSEEdgeWeight d)
         : Super(u, o, d), _nodeID(u) {}
-    
+
         NodeID nodeID() const {return _nodeID;}
-        
+
     private:
         NodeID _nodeID;
     };
@@ -157,17 +157,17 @@ private:
             _searchSp.resize(iss.searchSp().size());
             copy(iss.searchSp().begin(), iss.searchSp().end(), _searchSp.begin());
         }
-        
+
         void serialize(ostream& out) const {
             VectorSerializer< Entry, NodeID, ComplexSerializer<Entry> >::serialize(out, _searchSp);
             VectorSerializer< NodeID, NodeID >::serialize(out, _index);
         }
-    
+
         void deserialize(istream& in) {
             VectorSerializer< Entry, NodeID, ComplexSerializer<Entry> >::deserialize(in, _searchSp);
             VectorSerializer< NodeID, NodeID >::deserialize(in, _index);
         }
-    
+
         void freeMemory() {
             vector<Entry>().swap(_searchSp);
             vector<NodeID>().swap(_index);
@@ -186,7 +186,7 @@ private:
         const_iterator end(NodeID u) const {
             return begin(u+1);
         }
-    
+
         NodeID size() const {
             return _searchSp.size();
         }
@@ -194,7 +194,7 @@ private:
         const vector<Entry>& searchSp() const {return _searchSp;}
 
         const vector<NodeID>& index() const {return _index;}
-        
+
     protected:
         /** Contains all search space entries. */
         vector<Entry> _searchSp;
@@ -218,7 +218,7 @@ private:
         typedef typename Entry::SSEEdgeWeight SSEEdgeWeight;
         using Super::_searchSp;
         using Super::_index;
-        
+
     public:
         /**
        * Adds a new entry.
@@ -279,22 +279,22 @@ private:
     typedef IndexedSearchSpace< SearchSpaceEntry<int, EdgeWeight> > ISSInt;
     typedef IndexedSearchSpace< SearchSpaceEntry<short, ushort> > ISSShort;
 
-   
 
-    
+
+
 public:
     void setCurrentNode(const NodeID cN) {_currentNode = cN;}
-    
+
     /** Sorts the backward search spaces and swaps them out to hard disk. */
     void swapOutSearchSpacesBW(const string filename, const NodeID noOfNodes) {
         VERBOSE( cout << "  search space sizes: " << _searchSpacesBwDynInt.size()
                       << " + " << _searchSpacesBwDynShort.size() << endl );
-        
+
         ofstream out(filename.c_str());
         _searchSpacesBwDynInt.sort(noOfNodes);
         _searchSpacesBwDynInt.serialize(out);
         _searchSpacesBwDynInt.freeMemory();
-        
+
         _searchSpacesBwDynShort.sort(noOfNodes);
         _searchSpacesBwDynShort.serialize(out);
         _searchSpacesBwDynShort.freeMemory();
@@ -315,8 +315,8 @@ public:
                       << " + " << _searchSpacesBwShort.size() << endl );
     }
 
-    
-    
+
+
     // *********************************************************
     // ****************** called from Dijkstra *****************
     // *********************************************************
@@ -333,7 +333,7 @@ public:
         // can be stored using less bits
         int diff = _currentNode;
         if (useDiffEncoding) diff -= u;
-        
+
         if (allowShorts && (dist < 0x10000) && (diff >= -0x8000) && (diff < 0x8000)) {
             // entry fits in 'short's
             _searchSpacesBwDynShort.add(u, diff, dist);
@@ -355,7 +355,7 @@ public:
     }
 
 
-    
+
 protected:
     // Backward search spaces (of all relevant nodes).
     // We have a dynamic and a static variant.

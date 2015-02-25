@@ -47,7 +47,7 @@ namespace command {
          * argument is "-s".
          */
         int main(int argc, char *argv[]) {
-            // The second command-line argument specifies the next choice, 
+            // The second command-line argument specifies the next choice,
             // possible are,
             //   -p: node ordering using a prority queue
             //   -l: partition a hcn-file with n levels into one with only a
@@ -63,7 +63,7 @@ namespace command {
             // this subprogram is reached if the first two command-line arguments
             // are "-s -p". Subsequent arguments specifiy further parameters.
             if (opt1 == 'p') {
-                
+
                 // The variables below contain the parameters for node ordering
                 // and input/output. They are specified using command-line
                 // arguments. A short documentation of them can be found in
@@ -75,12 +75,12 @@ namespace command {
                 string statsFile("");
                 string logFile("");
                 string exportSearchGraphFile("");
-                
+
                 // stores most of the relevant parameters for node ordering
-                // especially the coefficients for the linear combination of 
+                // especially the coefficients for the linear combination of
                 // the priority terms and the limits to the local searches
-                ProcessingNodeOrder::WeightCalculation calc; 
-                    
+                ProcessingNodeOrder::WeightCalculation calc;
+
                 bool test = false;
                 string sgrFile("");
                 string chFile("");
@@ -118,7 +118,7 @@ namespace command {
                         case 'l':
                             logFile = string(optarg);
                             break;
-                            
+
                         // *** The following coefficients are for the linear ***
                         // *** combination of the priority (weight).         ***
                         // coefficient for edge difference
@@ -140,7 +140,7 @@ namespace command {
                         // coefficient for deleted neighbors
                         case 'w':
                             calc.delNeighbMult = atoi(optarg);
-                            break;    
+                            break;
                         // coefficient for number of new edges
                         case 'v':
                             calc.newEdgesMult = atoi(optarg);
@@ -157,7 +157,7 @@ namespace command {
                         // for a time-dependend search, requested by Veit Batz
                         case 'T':
                             calc.searchPathHopBorderOriginalEdges = true;
-                            break; 
+                            break;
                         // coefficient for sum of original edges new shortcuts represent
                         case 'e':
                             calc.shortcutOriginalEdgeSumMult = atoi(optarg);
@@ -246,13 +246,13 @@ namespace command {
                     exit(1);
                 }
                 #endif
-                
+
                 // CH-export needs middle nodes of shortcuts, thus USE_CH_EXPAND
                 #ifndef USE_CH_EXPAND
                 if ( chFile != "" )
                 {
                     cerr << "#define USE_CH_EXPAND in config.h to export CH-file (-C)." << endl;
-                    exit(1);   
+                    exit(1);
                 }
                 #endif
 
@@ -261,8 +261,8 @@ namespace command {
                 stringstream ss;
                 ss << "exact-" << calc.edgeDiffMult << "-" << calc.searchSpaceMult << "-" << calc.betweennessAdd << "-" << calc.delNeighbMult;
                 ss << "-" << calc.newEdgesMult << "-" << calc.maxSettledApprox << "-" << calc.reachAdd << "-" << calc.lazyUpdateRecalcLimit;
-                ss << "-" << calc.maxSettledElim << "-"; 
-                copy(calc.maxHops.begin(), calc.maxHops.end(), ostream_iterator<double>(ss,"-")); 
+                ss << "-" << calc.maxSettledElim << "-";
+                copy(calc.maxHops.begin(), calc.maxHops.end(), ostream_iterator<double>(ss,"-"));
                 ss << calc.voronoiMult << "-" << calc.searchPathHopBorderMult << "-" << calc.updateHops << "-" << calc.localReduceEdges;
                 ss << "-" << calc.shortcutOriginalEdgeSumMult << "-" << calc.searchPathHopBorderOriginalEdges;
                 if (output == "x")
@@ -279,11 +279,11 @@ namespace command {
                 }
                 if (exportSearchGraphFile == "x")
                 {
-                    exportSearchGraphFile = (ss.str() + ".ddsg");   
+                    exportSearchGraphFile = (ss.str() + ".ddsg");
                 }
                 if (sgrFile == "x")
                 {
-                    sgrFile = (ss.str() + ".sgr");   
+                    sgrFile = (ss.str() + ".sgr");
                 }
                 if (chFile == "x")
                 {
@@ -333,7 +333,7 @@ namespace command {
                 datastr::graph::UpdateableGraph* graph = importGraphListOfEdgesUpdateable(in, false, false, "");
                 in.close();
 
-                
+
                 // Read betwenness centrality if specified.
                 vector<BetweennessValue>* betweenness = NULL;
                 if (betweennessFile != "")
@@ -363,28 +363,28 @@ namespace command {
                     for (NodeID u = 0; u < graph->noOfNodes() ; u++) {
                         assert ( !in2.eof() );
                         in2.read((char*)&buffer, sizeof(unsigned int)/sizeof(char));
-                        (*reach)[u] = buffer; 
+                        (*reach)[u] = buffer;
                     }
                     in2.close();
                 }
 
                 // Initialize pseudorandom number generator allow reproduction of results.
                 // Currently, no random data is used during node ordering but it does not harm
-                // either to specifiy the random seed.                
+                // either to specifiy the random seed.
                 srand(22);
 
                 // Object for node ordering.
                 ProcessingNodeOrder c(graph);
-                
-                // Prepare output files for witness and shortcut information that can 
-                // be used in a later hierarchy construction step. 
+
+                // Prepare output files for witness and shortcut information that can
+                // be used in a later hierarchy construction step.
                 // To export the wheter witness information, a template parameter
                 // in the ProcessingNodeOrder class needs to be set. There is
                 // currently node switch in ../config.h
                 ofstream outShortcuts;
                 ofstream outWitnesses;
                 if ( c.savesShortcutsWitnesses() )
-                {                    
+                {
                     outShortcuts.open((ss.str()+".shortcuts").c_str());
                     if (!outShortcuts.is_open()) { cerr << "Cannot write to " << (ss.str()+".shortcuts") << endl; exit(1); }
                     c.storeShortcuts(outShortcuts);
@@ -401,7 +401,7 @@ namespace command {
                 VERBOSE( cout << "Create node order and hierarchy using a priority queue..." << endl; )
                 c.createHierarchy(calc, betweenness, reach, statsFile, test);
                 VERBOSE( timeCalc = timestamp() - timeCalc; )
-                
+
                 // Now write the node order to a hcn-file.
                 VERBOSE( cout << "Write node order (levels) to " << output << " ..." << endl; )
                 ofstream out(output.c_str());
@@ -410,7 +410,7 @@ namespace command {
                 out.close();
                 if ( outShortcuts.is_open() ) outShortcuts.close();
                 if ( outWitnesses.is_open() ) outWitnesses.close();
-                
+
                 // additional output: search-graph to text format
                 if ( exportSearchGraphFile != "" )
                 {
@@ -419,7 +419,7 @@ namespace command {
                     if (!outSearchGraph.is_open()) { cerr << "Cannot write to " << exportSearchGraphFile << endl; exit(1); }
                     exportSearchGraph(outSearchGraph, graph);
                 }
-                
+
                 // additional output: search-graph to binary format (depends on switches in config.h)
                 if ( sgrFile != "" )
                 {
@@ -428,9 +428,9 @@ namespace command {
                     ofstream out(sgrFile.c_str());
                     if (!out.is_open()) { cerr << "Cannot write to " << sgrFile << endl; exit(1); }
                     searchGraph->serialize(out);
-                        
+
                 }
-                
+
                 // additional output: contraction hierarchy to binary format (../docu/chDocu.html)
                 if ( chFile != "" )
                 {
@@ -439,7 +439,7 @@ namespace command {
                     if (!out.is_open()) { cerr << "Cannot write to " << chFile << endl; exit(1); }
                     exportContractionHierarchy( out, graph );
                 }
-                
+
                 // statistic: count the total number of expanded edges
                 // Only works correct for a n-level hierarchy otherwise edges may be counted twice.
                 long totalExpandedEdges = 0;
@@ -569,7 +569,7 @@ namespace command {
                 }
                 else if (hcnFile != "")
                 {
-                    vector<unsigned int> counter;   
+                    vector<unsigned int> counter;
                     VERBOSE( std::cout << "Open file " << hcnFile << "..." << std::endl; )
                     std::ifstream in(hcnFile.c_str());
                     if (!in.is_open()) { cerr << "Cannot open " << hcnFile << endl; exit(1); }

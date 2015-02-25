@@ -56,10 +56,10 @@ namespace command {
             string hcnFile("");      // input level file
             string importFile("");
             string exportFile("");
-            
+
             // Encapsulates the contraction parameters, e.g. hop limits.
             ProcessingConstruct::ContractParameters contractParams;
-                
+
             bool testAllNodes = false;
             string retrieve("");
             string sgrFile("");
@@ -68,7 +68,7 @@ namespace command {
             string chFile("");
             datastr::graph::SearchGraphNodeOrder nodeOrder = datastr::graph::SGNO_LOGLEVEL_ORIGINAL;
             int i;
-            
+
             int opt2 = -1;
             while ((opt2 = getopt(argc, argv, "f:h:m:k:ts:Lz:O:G:d:c:C:")) != -1)
             {
@@ -92,7 +92,7 @@ namespace command {
                     case 'z':
                         sgrFile = string(optarg);
                         break;
-                        
+
                     // limit of settled nodes in local searches during contraction
                     case 'm':
                         contractParams.maxSettledElim = atoi(optarg);
@@ -107,25 +107,25 @@ namespace command {
                         contractParams.maxHops.clear();
                         Command::createVector(string(optarg),contractParams.maxHops,(double)0);
                         break;
-                        
+
                     // perform forward- and backward searches from all nodes without and
                     // abort-on-success criterion. The statistics concerning settled nodes,...
                     // are stored to file to calculate worst case upper bounds.
                     case 't':
                         testAllNodes = true;
                         break;
-                        
+
                     // Retrieve witnesses and shortcuts from file. Those files contain The
-                    // stored witnesses and shortcuts during node ordering. Note that 
+                    // stored witnesses and shortcuts during node ordering. Note that
                     case 's':
                         retrieve = string(optarg);
                         break;
-                        
+
                     // omit local edge reduction
                     case 'L':
                         contractParams.localReduceEdges = !contractParams.localReduceEdges;
                         break;
-                        
+
                     // specifiy node order in the search graph
                     //   0 = node order from original graph
                     //   1 = node order according to level (0..(n-1))
@@ -138,25 +138,25 @@ namespace command {
                         else if ( i == 1 ) nodeOrder = datastr::graph::SGNO_LEVEL;
                         else if ( i == 2 ) nodeOrder = datastr::graph::SGNO_LOGLEVEL_ORIGINAL;
                         break;
-                    
+
                     // export edges of search graph to text file, requested by D.Delling
                     case 'G':
                         edgesGraphFile = string(optarg);
-                        break;                       
+                        break;
                     // demands file, each line of the text-file specifies a s-t-query
                     // the runtime of each query is expored. Can be used to perform
                     // local queries.
                     case 'd':
                         demandsFile = string(optarg);
                         break;
-                        
+
                     // Core size, the contraction aborts if the remaining graph
-                    // only contains this number of nodes. Used for assymetric 
+                    // only contains this number of nodes. Used for assymetric
                     // many-to-many calculations.
                     case 'c':
                         contractParams.coreSize = atoi(optarg);
                         break;
-                        
+
                     // Export contraction hierarchy including node order and shortcuts
                     // to file
                     case 'C':
@@ -171,20 +171,20 @@ namespace command {
             if ( chFile != "" )
             {
                 cerr << "#define USE_CH_EXPAND in config.h to export CH-file (-C)." << endl;
-                exit(1);   
+                exit(1);
             }
             #endif
 
 
             datastr::graph::SearchGraph* searchGraph = NULL;
-                
+
             // Output messages are written to this stringstream. It will be written to
             // stdout and a logfile after the contraction and tests.
             stringstream ss;
-            
+
             // number of s-t-pairs calculated for average query time and path expansion
             static const unsigned int noOfTestCases = 100000;
-            // number of s-t-pairs whose shortest paths distance in the CH is compared to the 
+            // number of s-t-pairs whose shortest paths distance in the CH is compared to the
             // shortest paths distance in the original graph, see TEST below.
             static const unsigned int noOfTestCasesVerify = 100;
             stringstream ssName;
@@ -192,7 +192,7 @@ namespace command {
             ss << "noOfTestCases " << noOfTestCases << endl;
             ss << "noOfTestCasesVerify " << noOfTestCasesVerify << endl;
             ss << "sizeof Edge " << sizeof(Edge) << endl;
-            
+
             // currently no on the fly edge reduction with witnesses
             if ( retrieve != "" ) contractParams.localReduceEdges = false;
 
@@ -200,7 +200,7 @@ namespace command {
 
             // TEST
             // Computate some shortest paths distances in the original graph without using CHs.
-            // Those distances can be compared to the results of the CH. Since the computation 
+            // Those distances can be compared to the results of the CH. Since the computation
             // in the original graph is time consuming, the distances are stored. The source and
             // target nodes are specified by the initalization of the random number generator
             // using srand(1);.
@@ -255,14 +255,14 @@ namespace command {
                     VERBOSE( percent.printStatus(x); )
                 }
                 delete tGraph;
-                
+
                 VERBOSE( cout << "Write test lengths to " << testLengthsFile << " ..." << endl; )
                 ofstream outTest(testLengthsFile.c_str());
                 if (!outTest.is_open()) { cerr << "Cannot write to " << testLengthsFile << endl; exit(1); }
                 for (NodeID x = 0; x < noOfTestCasesVerify; x++) {
                     outTest << _test[x] << endl;
                 }
-                outTest.close();                
+                outTest.close();
             }
             // TEST END
 
@@ -272,10 +272,10 @@ namespace command {
             {
                 // create a file name depending on the parameters
                 ssName << hcnFile << "-" << contractParams.maxSettledElim << "-";
-                copy(contractParams.maxHops.begin(), contractParams.maxHops.end(), ostream_iterator<double>(ssName,"-"));  
+                copy(contractParams.maxHops.begin(), contractParams.maxHops.end(), ostream_iterator<double>(ssName,"-"));
                 ssName << contractParams.localReduceEdges << "-" << nodeOrder << "-" << contractParams.coreSize;
                 datastr::graph::UpdateableGraph* updGraph;
-    
+
                 // input original graph
                 ifstream in(ddsgFile.c_str());
                 if (!in.is_open()) { cerr << "Cannot open " << ddsgFile << endl; exit(1); }
@@ -292,12 +292,12 @@ namespace command {
                     {
                         const Edge& edge = updGraph->edge(e);
                         if ( edge.isDirected(0) )
-                        {                            
+                        {
                             noOfUnidirectionalEdges++;
                         }
                     }
                 }
-    
+
                 double time;
                 // Construct with witness and shortcut infos. This is only and
                 // preliminary implementation for testing purpose.
@@ -309,42 +309,42 @@ namespace command {
                     if (!in.is_open()) { cerr << "Cannot open " << hcnFile << endl; exit(1); }
                     construct.readLevels(in);
                     in.close();
-                    
+
                     ifstream inShortcuts((retrieve+".shortcuts").c_str());
                     if (!inShortcuts.is_open()) { cerr << "Cannot open " << (retrieve+".shortcuts") << endl; exit(1); }
                     VERBOSE( cout << "Retrieve shortcuts from " << (retrieve+".shortcuts") << endl; )
                     ifstream inWitnesses((retrieve+".witnesses").c_str());
                     if (!inWitnesses.is_open()) { cerr << "Cannot open " << (retrieve+".witnesses") << endl; exit(1); }
                     VERBOSE( cout << "Retrieve witnesses from " << (retrieve+".witnesses") << endl; )
-                    
+
                     time = timestamp();
                     construct.constructHierarchyWithWitnesses(contractParams,inShortcuts, inWitnesses);
                     time = timestamp() - time;
                     construct.clear();
                 }
-                
+
                 // Construct CH only using the node order given by the hcn-file.
                 else
                 {
-                    VERBOSE( cout << "Construct from " << hcnFile << " ..." << endl; )            
-                    
+                    VERBOSE( cout << "Construct from " << hcnFile << " ..." << endl; )
+
                     // Construction class, contains code for construction.
                     ProcessingConstruct construct(updGraph);
-                    
+
                     // read in node order from hcn-file
                     in.open(hcnFile.c_str());
                     if (!in.is_open()) { cerr << "Cannot open " << hcnFile << endl; exit(1); }
                     construct.readLevels(in);
                     in.close();
-                    
+
                     // *** Perform construction ***
                     time = timestamp();
                     construct.constructHierarchy(contractParams);
                     time = timestamp() - time;
-                    
+
                     construct.clear();
                 }
-    
+
                 // Convert UpdateableGraph to SearchGraph, a search-graph allows
                 // faster queries and lower space consumption. It also changes the node
                 // order that additionaly improves the avgerage query time.
@@ -450,7 +450,7 @@ namespace command {
                     {
                         const Edge& edge = searchGraph->edge(e);
                         if ( edge.isShortcut() )
-                        {                            
+                        {
                             noOfShortcutEdges++;
                         }
                     }
@@ -472,10 +472,10 @@ namespace command {
                     ((((double)sizeof(Edge)*searchGraph->noOfEdges())
                         -((double)8*noOfEdgesOriginal))/searchGraph->noOfNodes()) << endl;
                 ss << "#shortcut edges: " << noOfShortcutEdges << endl;
-    
+
                 delete updGraph;
             }
-            
+
             // if no node order is given by a hcn-file, the no hierarchy construction is performed
             // and the search-graph is deserialized from a binary file
             // Note: only sgr-files created by the same binary should be used because
@@ -521,7 +521,7 @@ namespace command {
             }
 
             // node mapping (external to internal IDs)
-            // note: in UpdateableGraph the original IDs are used, 
+            // note: in UpdateableGraph the original IDs are used,
             //       mapping only necessary for SearchGraph
             // the node mapping is necessary to get the same source-target pairs used during
             // the comparison test runs, see above (TEST)
@@ -543,7 +543,7 @@ namespace command {
             double singleTime;
 
             // Cache warmup, the required run time does not count
-            Checksum checkSum1 = 0; 
+            Checksum checkSum1 = 0;
             VERBOSE( cout << "Cache warmup" << flush; )
             singleTime = timestamp();
             for ( NodeID x = 0; x < warmup.size(); x++ )
@@ -574,7 +574,7 @@ namespace command {
 
             ss << "avg query time: " <<  ((time/(runs.size()))*1000) << " ms" << endl;
 
-            
+
             // If the program is compiled with edges supporting path expansion
             // (switch USE_CH_EXPAND in ../config.h) we perform test runs with
             // path expansion. The same source and target pairs as for the average query time
@@ -606,7 +606,7 @@ namespace command {
             }
 
 
-            // Now we perform test runs with the same soure and target pairs as in the two 
+            // Now we perform test runs with the same soure and target pairs as in the two
             // loops above. Now, the runtime is not relevant, we now gather statistics like
             // the number of settled nodes. In case of path expansion, we also check the
             // expanded paths. And we compare the first noOfTestCasesVerify shortest paths
@@ -621,14 +621,14 @@ namespace command {
             unsigned int settledMinusStalledNodesMin = UINT_MAX;
             unsigned int settledMinusStalledNodesMax = 0;
             unsigned int settledMinusStalledNodesSum = 0;
-            
+
             unsigned int pathNoOfEdgesMin = UINT_MAX;
             unsigned int pathNoOfEdgesMax = 0;
             unsigned int pathNoOfEdgesSum = 0;
             unsigned int pathExpandNoOfEdgesMin = UINT_MAX;
             unsigned int pathExpandNoOfEdgesMax = 0;
             unsigned int pathExpandNoOfEdgesSum = 0;
-            
+
             COUNTING( counter.reset(); )
             for (NodeID x = 0; x < runs.size(); x++) {
                 EdgeWeight dist = dijkstra.bidirSearch(runs[x].first, runs[x].second);
@@ -651,8 +651,8 @@ namespace command {
                     }
                 }
                 // TEST END
-                
-                
+
+
                 unsigned int settledNodes = dijkstra.noOfSettledNodes();
                 settledNodesSum += settledNodes;
                 if (settledNodes > settledNodesMax) settledNodesMax = settledNodes;
@@ -772,14 +772,14 @@ namespace command {
                 if (!out.is_open()) { cerr << "Cannot write to " << (ssName.str()+".stats.settled-nodes-forward") << endl; exit(1); }
                 for ( NodeID i = 0; i < settledNodes[0].size(); i++ )
                 {
-                    out << settledNodes[0][i] << endl;   
+                    out << settledNodes[0][i] << endl;
                 }
                 out.close();
                 out.open((ssName.str()+".stats.settled-nodes-backward").c_str());
                 if (!out.is_open()) { cerr << "Cannot write to " << (ssName.str()+".stats.settled-nodes-backward") << endl; exit(1); }
                 for ( NodeID i = 0; i < settledNodes[1].size(); i++ )
                 {
-                    out << settledNodes[1][i] << endl;   
+                    out << settledNodes[1][i] << endl;
                 }
                 out.close();
 
@@ -788,17 +788,17 @@ namespace command {
                 if (!out.is_open()) { cerr << "Cannot write to " << (ssName.str()+".stats.settled-minus-stalled-nodes-forward") << endl; exit(1); }
                 for ( NodeID i = 0; i < settledMinusStalledNodes[0].size(); i++ )
                 {
-                    out << settledMinusStalledNodes[0][i] << endl;   
+                    out << settledMinusStalledNodes[0][i] << endl;
                 }
                 out.close();
                 out.open((ssName.str()+".stats.settled-minus-stalled-nodes-backward").c_str());
                 if (!out.is_open()) { cerr << "Cannot write to " << (ssName.str()+".settled-minus-stalled-nodes-backward") << endl; exit(1); }
                 for ( NodeID i = 0; i < settledMinusStalledNodes[1].size(); i++ )
                 {
-                    out << settledMinusStalledNodes[1][i] << endl;   
+                    out << settledMinusStalledNodes[1][i] << endl;
                 }
                 out.close();
-                
+
                 // relaxed edges
                 COUNTING( out.open((ssName.str()+".stats.relaxed-edges-forward").c_str());  )
                 COUNTING( if (!out.is_open()) { cerr << "Cannot write to " << (ssName.str()+".stats.relaxed-edges-forward") << endl; exit(1); } )
@@ -814,7 +814,7 @@ namespace command {
                 COUNTING(     out << relaxedEdges[1][i] << endl;                            )
                 COUNTING( }                                                                 )
                 COUNTING( out.close();                                                      )
-                
+
                 // successfully relaxed edges
                 COUNTING( out.open((ssName.str()+".stats.successfully-relaxed-edges-forward").c_str());  )
                 COUNTING( if (!out.is_open()) { cerr << "Cannot write to " << (ssName.str()+".stats.successfully-relaxed-edges-forward") << endl; exit(1); } )

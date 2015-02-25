@@ -33,7 +33,7 @@
  */
 class Path
 {
-    /** Outputs data about the path for debugging purposes. */ 
+    /** Outputs data about the path for debugging purposes. */
     friend ostream& operator<<( ostream& os, const Path& p ) {
         if (p._notConnected) {
             os << "NOT CONNECTED" << endl;
@@ -47,11 +47,11 @@ class Path
         os << setprecision(20);
         os << p.length() << ": " << p.node(0);
         for (EdgeID e = 0; e < p.noOfEdges(); e++)
-            os << " --" << p._weights[e] << "-> " << p.node(e+1); 
+            os << " --" << p._weights[e] << "-> " << p.node(e+1);
         os << endl;
         return os;
     }
-    
+
 public:
     /** Returns true iff the given path is identical to this path. */
     bool operator== (const Path& p) const {
@@ -65,12 +65,12 @@ public:
         return (length() < p.length());
     }
 
-    /** 
+    /**
      * Constructor.
      * Creates an empty path.
      */
     Path() {clear();}
-    
+
     /**
      * Constructor.
      * Creates a path with a given start node.
@@ -96,8 +96,8 @@ public:
         assert( checkInvariant() );
     }
 
-    /** 
-     * Adds an edge to this path. 
+    /**
+     * Adds an edge to this path.
      * Note: the source of the edge is the formerly last node in the path.
      * @param id the target of the edge
      * @param w the weight of the edge
@@ -111,7 +111,7 @@ public:
         assert( checkInvariant() );
     }
 
-    /** 
+    /**
      * Adds an edge to this path.
      * Note: the source of the edge is the formerly last node in the path.
      * @param nodeID the target of the edge
@@ -170,7 +170,7 @@ public:
         std::reverse( _shortcuts.begin(), _shortcuts.end() );
     }
 
-    /** 
+    /**
      * When this path is used to store a path between two nodes s and t,
      * this flag can be set to indicate that s and t aren't connected.
      */
@@ -178,7 +178,7 @@ public:
 
     /** Returns the number of nodes that belong to this path. */
     NodeID noOfNodes() const {return _nodes.size();}
-    
+
     /** Returns the number of edges that belong to this path. */
     EdgeID noOfEdges() const {
         assert( _weights.size() == _shortcuts.size() );
@@ -187,12 +187,12 @@ public:
 
     /** Returns true iff this path is empty. */
     bool empty() const {return noOfNodes() == 0;}
-    
+
     /** Returns the length (sum of weights) of this path. */
     EdgeWeight length() const {
         // special case: length "infinity" means "not connected"
         if (_notConnected) return Weight::MAX_VALUE;
- 
+
         return _length;
     }
 
@@ -227,21 +227,21 @@ public:
 	assert( index < _edges.size() );
 	_edges[index] = newID;
     }
-    
+
     bool isShortcut(EdgeID index) const {
         assert( index < _shortcuts.size() );
         return _shortcuts[index];
     }
 
     bool isNotConnected() const {return _notConnected;}
-    
+
 
     /**
      * Computes the differences between this path and a given path.
      * @param p the path that this path is compared to
-     * @param diff1 a subpath of this path that begins just before the first 
+     * @param diff1 a subpath of this path that begins just before the first
      *              occurence of a difference and ends just after the last
-     * @param diff2 a subpath of p that begins just before the first 
+     * @param diff2 a subpath of p that begins just before the first
      *              occurence of a difference and ends just after the last
      */
     void diff(const Path& p, Path& diff1, Path& diff2) const {
@@ -256,14 +256,14 @@ public:
         }
 
         if (*this == p) return; // completely equal
-        
+
         EdgeID i; // moves in both paths forwards
         EdgeID j; // moves in this path backwards
         EdgeID k; // moves in the path p backwards
         // look for the first difference:
         // move forwards until a difference occurs
-        for (i=0; 
-               (i<noOfEdges()) && (i<p.noOfEdges()) && 
+        for (i=0;
+               (i<noOfEdges()) && (i<p.noOfEdges()) &&
                (node(i)==p.node(i)) && (_weights[i]==p._weights[i]);
              i++) ;
         // look for the last difference:
@@ -278,7 +278,7 @@ public:
         if (i > 0) i--;
         if (j < noOfEdges()) j++;
         if (k < p.noOfEdges()) k++;
-        
+
         subpath( diff1, i, j);   // copy the appropriate subpath of this path to diff1
         p.subpath( diff2, i, k); // copy the appropriate subpath of p to diff2
     }
@@ -291,11 +291,11 @@ public:
         for (EdgeID e = 0; e < noOfEdges(); e++)
             out << node(e) << " " << node(e+1) << " " << _weights[e] << " " << color << endl;
     }
-    
+
 private:
     /** The nodes of this path. */
     vector<NodeID> _nodes;
-    
+
     /** The weights of the edges of this path. */
     vector<EdgeWeight> _weights;
 
@@ -304,18 +304,18 @@ private:
 
     /** For each edge in this path, a shortcut flag. */
     vector<bool> _shortcuts;
-    
+
     /** The length (=sum of edge weights) of this path. */
     EdgeWeight _length;
-    
-    /** 
+
+    /**
      * A flag that indicates that two nodes are not connected
      * in case that this path should represent a connection
      * between those two nodes.
      */
     bool _notConnected;
 
-    
+
     /**
      * Checks the invariant that the number of nodes of a non-empty
      * path is always equal to the number of edges plus 1.
@@ -329,7 +329,7 @@ private:
         p.addFirstNode(node(begin));
         for (NodeID u = begin+1; u <= end; u++) p.add( node(u), _weights[u-1], _shortcuts[u-1] );
     }
-    
+
 };
 
 /** Represents a collection of paths. */
@@ -353,7 +353,7 @@ public:
         Path diff1, diff2; // store the differences of one comparison of two paths
         vector< pair<Path, Path> > diffs; // stores the differences of all comparisons,
                                           // all entries are unique (duplicates aren't stored)
-        
+
         // compare path i in this collection with path i in the collection p
         for (NodeID i = 0; i < size(); i++) {
             (*this)[i].diff( p[i], diff1, diff2 ); // perform comparison
@@ -382,14 +382,14 @@ public:
         os << countDifferentPaths << " out of " << size() << " pairs of paths differ. ("
            << diffs.size() << " distinct differences)" << endl;
 
-        if (countDifferentLengths == 0) {            
+        if (countDifferentLengths == 0) {
             os << "For each pair of paths, the lengths are equal." << endl << endl;
         }
         else {
             os << endl << "!!! WARNING !!! The path lengths differ in "
                << countDifferentLengths << " cases. !!! WARNING !!!" << endl << endl;
         }
-        
+
         if (verbose) {
             // write details
             for (NodeID i = 0; i < diffs.size(); i++) {
@@ -398,8 +398,8 @@ public:
         }
     }
 
-    /** 
-     * Exports all edges of all paths of this collection to the given stream 
+    /**
+     * Exports all edges of all paths of this collection to the given stream
      * using the given color (in order to be able to draw the paths).
      */
     void exportEdges(ostream& out, int color) {

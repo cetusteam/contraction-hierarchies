@@ -46,7 +46,7 @@ typedef datastr::graph::SearchGraph TransitGraph;
 #include "../processing/DijkstraCH.h"
 #include "manyToMany.h"
 
-                 
+
 
 typedef datastr::graph::SearchGraph MyGraph;
 typedef DijkstraCHManyToManyFW DijkstraManyToManyFW;
@@ -79,13 +79,13 @@ int main(int argc, char *argv[])
     }
 
     const string filenameGraph = argv[1];
-    
+
     NodeID noOfSources = 1000;
     if (argc >= 3) noOfSources = atoi(argv[2]);
 
     NodeID noOfTargets = 1000;
     if (argc >= 4) noOfTargets = atoi(argv[3]);
-        
+
     LevelID earlyStopLevel = 10;
 
     bool writeSourceNodes = false;
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     VERBOSE( if (writeMatrix)      cout << "write matrix to cerr" << endl );
     VERBOSE( if (validateResult)   cout << "validate result" << endl );
     VERBOSE( cout << endl );
-    
+
 
     // read graph
     ifstream inGraph( filenameGraph.c_str(), ios::binary );
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     MyGraph *const graph = new MyGraph(inGraph);
     inGraph.close();
     VERBOSE( cout << "Graph read." << endl );
-    
+
 
     // create many-to-many object
     ManyToMany<MyGraph, DijkstraManyToManyFW, DijkstraManyToManyBW, performBucketScans> mtm(graph, earlyStopLevel);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     const NodeID noOfNodes = graph->noOfNodes();
     vector<NodeID> sources;
     for (NodeID i = 0; i < noOfSources; i++) sources.push_back(mapNodeID(graph, randomNodeID(noOfNodes)));
-    
+
     vector<NodeID> targets;
     for (NodeID i = 0; i < noOfTargets; i++) targets.push_back(mapNodeID(graph, randomNodeID(noOfNodes)));
 

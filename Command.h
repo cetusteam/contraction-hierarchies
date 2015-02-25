@@ -36,7 +36,7 @@ class Command {
       * - axb = a,a,a,...,a (b times, n,n-1 for b possible)
       */
     template< typename T >
-    static void createVector(const string& str, vector<T>& result, T n = 0) 
+    static void createVector(const string& str, vector<T>& result, T n = 0)
     {
         boost::regex pattern1("^((n|\\d+)\\*)?(\\d+)\\^(-?\\d+):(-?\\d+|(-?ld\\(n\\))\\+?(-?\\d+)?)(\\+(-?\\d+))?$");
         boost::regex pattern2("^(\\d+)x(-?\\d+|n|n-1)$");
@@ -76,7 +76,7 @@ class Command {
             if (what[8] != "")
             {
                 step = atoi(what[9].str().data());
-            } 
+            }
             if (step > 0)
             {
                 for (double i  = start; i <= stop; i += step)
@@ -112,7 +112,7 @@ class Command {
                 result.push_back(a);
             }
         }
-        else if (boost::regex_match(str, what, pattern3)) 
+        else if (boost::regex_match(str, what, pattern3))
         {
             int div = atoi(what[1].str().data());
             int times = atoi(what[2].str().data());
@@ -126,9 +126,9 @@ class Command {
         }
         else if (str == "n")
         {
-            result.push_back(n);        
+            result.push_back(n);
         }
-        else 
+        else
         {
             char ch = ',';
             string::size_type pos = 0;
@@ -148,7 +148,7 @@ class Command {
             result.push_back((T)atof(str.substr(pos).data()));
         }
     }
-    
+
     };
 
 #endif // _COMMAND_H

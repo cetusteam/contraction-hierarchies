@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007, 2008 
+/* Copyright (C) 2005, 2006, 2007, 2008
  * Robert Geisberger, Dominik Schultes, Peter Sanders,
  * Universitaet Karlsruhe (TH)
  *
@@ -38,23 +38,23 @@ typedef double BetweennessValue;
 typedef unsigned int ReachValue;
 
 namespace processing {
-    
+
     /**
      * Constructs a Contraction Hieararchy (CH). This is the main class for preprocessing.
-     * Either a CH is created from scratch including a new node order using a priority 
+     * Either a CH is created from scratch including a new node order using a priority
      * queue, see createHierarchy(), or a hierarchy construction with a given node order
      * is performed using constructHierarchy().
      * @param Graph graph class
-     * @param saveShortcutsWitnesses should shortcuts and witnesses be written to file? 
+     * @param saveShortcutsWitnesses should shortcuts and witnesses be written to file?
      *                               note: local edge reduction and one hop backward search
      *                                     currently not supported if TRUE
      * @param saveShortcutsText save shortcuts to text file, requested by D.Delling
      * @param saveStats save stats to file (slows down node ordering)
      * @param oneHopBackwardSearch on k-hop-search, do (k-1)-hop forward-search with dijktra and 1-hop backward (edge array scan)
-     * @param onTheFlyWitnessCheck if true, do not create "witness-shortcuts" before 
+     * @param onTheFlyWitnessCheck if true, do not create "witness-shortcuts" before
      *        the contraction and read the witnesses directly from file during contraction.
      */
-    template 
+    template
         <
         typename Graph,
         bool saveShortcutsWitnesses = false,
@@ -74,20 +74,20 @@ namespace processing {
         };
 
         /**
-         * Represents parameters used for node ordering. It specifies the coefficients for 
-         * the linear combination of the priority terms, the settled nodes and hop limits to the 
+         * Represents parameters used for node ordering. It specifies the coefficients for
+         * the linear combination of the priority terms, the settled nodes and hop limits to the
          * local searches and other parameters.
          * Those parameters are usually set in ../command/NodeOrder.h
          */
         struct WeightCalculation
         {
-            WeightCalculation() : 
-                edgeDiffMult(0), newEdgesMult(0), delNeighbMult(0), searchSpaceMult(0), 
-                betweennessAdd(0), reachAdd(0), voronoiMult(0), searchPathHopBorderMult(0), 
+            WeightCalculation() :
+                edgeDiffMult(0), newEdgesMult(0), delNeighbMult(0), searchSpaceMult(0),
+                betweennessAdd(0), reachAdd(0), voronoiMult(0), searchPathHopBorderMult(0),
                 searchPathHopBorderOriginalEdges(false), shortcutOriginalEdgeSumMult(0),
-                maxSettledApprox(0), maxSettledElim(0),  lazyUpdateRecalcLimit(0), updateHops(false), 
+                maxSettledApprox(0), maxSettledElim(0),  lazyUpdateRecalcLimit(0), updateHops(false),
                 localReduceEdges(!saveShortcutsWitnesses)
-                
+
             {
             }
             // coefficient for edge difference
@@ -110,7 +110,7 @@ namespace processing {
             // for a time-dependend search, requested by Veit Batz
             bool searchPathHopBorderOriginalEdges;
             // coefficient for sum of original edges new shortcuts represent
-            int shortcutOriginalEdgeSumMult;            
+            int shortcutOriginalEdgeSumMult;
             // limit of settled nodes in local searches during weight calculation
             unsigned int maxSettledApprox;
             // limit of settled nodes in local searches during contraction
@@ -129,14 +129,14 @@ namespace processing {
         };
 
         /**
-         * Represents parameters used for hierarchy construction. It specifies 
-         * the settled nodes and hop limits to the 
+         * Represents parameters used for hierarchy construction. It specifies
+         * the settled nodes and hop limits to the
          * local searches and other parameters.
          * Those parameters are usually set in ../command/Construct.h
          */
         struct ContractParameters
         {
-            ContractParameters() : 
+            ContractParameters() :
                 maxSettledElim(0), localReduceEdges(true), coreSize(0)
             { }
             unsigned int maxSettledElim;
@@ -150,7 +150,7 @@ namespace processing {
          * Constructor.
          * @param graph Graph object, will be modified so that it becomes a CH.
          */
-        ConstructCH(Graph* graph) 
+        ConstructCH(Graph* graph)
             :
             _graph(graph),
             _localDijkstra(graph),
@@ -159,7 +159,7 @@ namespace processing {
             _testDijkstra(graph)
         {
         }
-        
+
         ///////////////////////////////////////////////////////////////////////
         ~ConstructCH()
         {
@@ -168,7 +168,7 @@ namespace processing {
 
 
         ///////////////////////////////////////////////////////////////////////
-        /** 
+        /**
          * Main method to create a hierarchy including node order.
          * This method is the public method that should be called.
          * @param weightCalc node ordering and contraction parameters, see class
@@ -178,8 +178,8 @@ namespace processing {
          * @param statsFile filename prefix for statistic files
          * @param testShortestPath perform time-consuming tests, only for debugging purpose
          */
-        void createHierarchy(WeightCalculation weightCalc, 
-            vector<BetweennessValue>* betweenness, 
+        void createHierarchy(WeightCalculation weightCalc,
+            vector<BetweennessValue>* betweenness,
             vector<ReachValue>* reach,
             string statsFile = "", bool testShortestPaths = false)
         {
@@ -196,17 +196,17 @@ namespace processing {
             // perform time-consuming tests during the hierarchy creation
             // used for debugging purposes
             if (_testShortestPaths) initTestShortestPaths();
-                
+
             // initialize priority queue with all nodes
             initPQueue();
-            
+
             // Perform elimination/contraction. Always the remaining nodes
             // with the lowest priority is removed from the queue, contracted
             // and the neighbors of this node get their priority updated.
             eliminateByPQueue();
         }
-        
-        
+
+
         /**
          * Main method to create a hierarchy if the node order is already given
          * by readLevels().
@@ -218,7 +218,7 @@ namespace processing {
             _localReduceEdges = contractParams.localReduceEdges;
             constructByLevel();
         }
-        
+
         /**
          * Main method to create a hierarchy if the node order is already given
          * by readLevels() and witness paths and shortcuts are stored.
@@ -232,8 +232,8 @@ namespace processing {
             _contractParams = contractParams;
             constructByLevelRetrieve(inShortcuts, inWitnesses);
         }
-        
-        
+
+
         /**
          * Write exact levels (node order) to file from 0 to n-1.
          * The levels are stored in the graph datastructure and
@@ -255,7 +255,7 @@ namespace processing {
                  out.write((char*)&buffer, sizeof(unsigned int)/sizeof(char));
              }
         }
-        
+
         /**
          * Read exact levels (node order) from file from 0 to n-1.
          * The levels will be stored in a separate array (_levelNodeList) and will
@@ -279,17 +279,17 @@ namespace processing {
                 _levelNodeList.push_back( make_pair( buffer, u ) );
             }
             sort( _levelNodeList.begin(), _levelNodeList.end() );
-            
+
             _noOfNodes = _graph->noOfNodes();
             _noOfEdges = _graph->noOfExistingEdges();
-            
+
         }
-        
+
         bool savesShortcutsWitnesses()
         {
-            return saveShortcutsWitnesses;   
+            return saveShortcutsWitnesses;
         }
-        
+
         /**
          *  Output stream to write shortcuts, only used if template parameter
          *  saveShortcutsWitnesses is enabled.
@@ -307,23 +307,23 @@ namespace processing {
         {
             _storeWitnesses.store(out);
         }
-        
+
         /**
          *  Returns the maximum average degree occured during the last hierarchy creation.
          */
-        double lastMaxAvgDegree() 
+        double lastMaxAvgDegree()
         {
             return _maxAvgDegree;
         }
 
         /**
          * Cleanum after hierarchy construction.
-         */        
+         */
         void clear()
     	{
     	    _levelNodeList.clear();
     	}
-    	
+
         /**
          * Partition a file with exact levels (total node order)
          * into given partitions, first partition contains highest levels.
@@ -332,17 +332,17 @@ namespace processing {
          * @param in input hcn-file
          * @param out output hcn-file
          * @param levelsStr comma-separated list of partition/level sizes
-         * @param a if this parameter is != 0, then the a most unimportant nodes will get a 
+         * @param a if this parameter is != 0, then the a most unimportant nodes will get a
          *          common level and above them has each node its own level.
          */
         static void partitionExactInLevels(istream& in, ostream& out, const string& levelsStr, unsigned int a)
         {
             unsigned int buffer;
             in.read((char*)&buffer, sizeof(unsigned int)/sizeof(char));
-            
+
             vector<NodeID> nodeByLevel(buffer, SPECIAL_NODEID); // reversed, index 0 is highest level
             vector<unsigned int> levelByNode(buffer, UINT_MAX);
-            
+
             if (a == 0)
             {
                 for ( unsigned int i = 0; i < levelByNode.size(); i++ )
@@ -357,17 +357,17 @@ namespace processing {
                 // parse levels str
                 vector<unsigned int> levels;
                 Command::createVector(levelsStr,levels,buffer);
-                VERBOSE( cout << "levels "; copy(levels.begin(),levels.end(), 
+                VERBOSE( cout << "levels "; copy(levels.begin(),levels.end(),
                 ostream_iterator<NodeID>(cout, ",")); cout << endl );
                 int level = levels.size();
                 NodeID levelCount = 0;
                 NodeID levelLimit = level > 0 ? levels[0] : 0;
-    
+
                 for ( vector<NodeID>::iterator iter = nodeByLevel.begin(); iter != nodeByLevel.end(); iter++ )
                 {
-    
+
                     levelByNode[*iter] = level;
-    
+
                     levelCount++;
                     if (levelCount == levelLimit) {
                         level--;
@@ -390,11 +390,11 @@ namespace processing {
 
                 for ( NodeID i = 0; i < a; i++ )
                 {
-                    levelByNode[nodeByLevel[i]] = 0;   
+                    levelByNode[nodeByLevel[i]] = 0;
                 }
                 for ( NodeID i = a; i < levelByNode.size(); i++ )
                 {
-                    levelByNode[nodeByLevel[i]] = i-(a-1);   
+                    levelByNode[nodeByLevel[i]] = i-(a-1);
                 }
             }
 
@@ -408,9 +408,9 @@ namespace processing {
                 out.write((char*)&buffer, sizeof(unsigned int)/sizeof(char));
              }
         }
-    	
-        
-        
+
+
+
     private:
 
 
@@ -421,29 +421,29 @@ namespace processing {
          */
         struct PQueueNodeElimination
         {
-            PQueueNodeElimination(): 
-                   level(UINT_MAX), searchSpace(0), deletedNeighbors(0), 
+            PQueueNodeElimination():
+                   level(UINT_MAX), searchSpace(0), deletedNeighbors(0),
                    searchPathHopBorder(0),
                    voronoiOwner(SPECIAL_NODEID), voronoiNextBorderNode(SPECIAL_NODEID), voronoiNumber(0)
                 {}
-                
-            // Level of the node. This is initially UINT_MAX and will be set 
-            // to the calculated level directly after the contraction 
+
+            // Level of the node. This is initially UINT_MAX and will be set
+            // to the calculated level directly after the contraction
             // of the node.
             unsigned int level;
-            
+
             // Size of the search spaces of the local searches. used
             // as priority term to speedup the contraction.
             unsigned int searchSpace;
-            
+
             // deleted/contracted neighbors counter
             unsigned int deletedNeighbors;
-            
+
             // Upper bound on search paths found by the query algorithm.
             // Datatype double is used since this bound is modified for
             // time-dependend routing (parameter "-T")
             double searchPathHopBorder;
-            
+
             // Those three variables are used for the priority term
             // Voronoi regions. They allow to manage the Voronoi regions
             // of the remaining nodes.
@@ -475,14 +475,14 @@ namespace processing {
             NewEdge (const NodeID source, const NodeID target, const EdgeWeight weight, const bool isBidirected,
                      const NodeID shortcutMiddle, const EdgeID shortcutParentEdge, const EdgeID shortcutChildEdge,
                      const EdgeID shortcutOriginalEdgeCount)
-                : source(source), edge(target, weight, EDGE_TYPE_SHORTCUT, true, isBidirected, 
+                : source(source), edge(target, weight, EDGE_TYPE_SHORTCUT, true, isBidirected,
                          shortcutMiddle, shortcutParentEdge, shortcutChildEdge, shortcutOriginalEdgeCount)
             { }
             NodeID source;
             Edge edge;
         };
-        
-        /** 
+
+        /**
          * Store shortcuts in a file (binary format), those are used to speedup the hierarchy construction
          * in a second step. (only preliminary)
          */
@@ -492,7 +492,7 @@ namespace processing {
             StoreShortcuts(): _out(NULL), _lastNode(SPECIAL_NODEID), _lastIn(SPECIAL_NODEID) { }
             /** Output stream to store shortcuts to. */
             void store(ostream& out) { _out = &out; }
-            /** 
+            /**
              * Write a shortcut to file, it omits the (middle) node and the input node if
              * it is the same as the previous shortcut. This is achieved using flags.
              */
@@ -531,11 +531,11 @@ namespace processing {
                     }
                 }
             }
-                
+
             private:
             // Node id is the contracted node.
             static const unsigned int TYPE_NODE = 0;
-            // Node id is a source node, as contracted node the previously 
+            // Node id is a source node, as contracted node the previously
             // written contracted node is used.
             static const unsigned int TYPE_IN = 1;
             // Node id is the target node, as contracted node and source
@@ -544,22 +544,22 @@ namespace processing {
             static const unsigned int TYPE_OUT_UNIDIRECTIONAL = 2;
             static const unsigned int TYPE_OUT_BIDIRECTIONAL = 3;
 
-            /** 
-             * Data structure, it can store a node id plus a 2-bit flag that 
+            /**
+             * Data structure, it can store a node id plus a 2-bit flag that
              * allows a more space efficient storage of shortcuts, see addShortcut()
-             */ 
+             */
             struct Data
             {
                 Data(unsigned int type, unsigned int id): type(type), id(id) { }
                 unsigned int type:2;
                 unsigned int id:30;
             };
-            ostream* _out;   
+            ostream* _out;
             NodeID _lastNode;
             NodeID _lastIn;
         };
-        
-        /** 
+
+        /**
          * Retrieve shortcuts from file (binary format), those are used to speedup the hierarchy construction.
          * (only preliminary)
          */
@@ -568,7 +568,7 @@ namespace processing {
             public:
             /** @param in Input stream to retrieve shortcuts from. */
             RetrieveShortcuts(istream& in)
-            : _in(in), _lastNode(SPECIAL_NODEID), _lastIn(SPECIAL_NODEID) 
+            : _in(in), _lastNode(SPECIAL_NODEID), _lastIn(SPECIAL_NODEID)
             {
                 _preEof = _in.eof();
                 read();
@@ -607,11 +607,11 @@ namespace processing {
                 read();
                 return true;
             }
-                
+
             private:
             // Node id is the contracted node.
             static const unsigned int TYPE_NODE = 0;
-            // Node id is a source node, as contracted node the previously 
+            // Node id is a source node, as contracted node the previously
             // read contracted node is used.
             static const unsigned int TYPE_IN = 1;
             // Node id is the target node, as contracted node and source
@@ -619,16 +619,16 @@ namespace processing {
             // Distinguish between unidirectional and bidirectional shortcuts.
             static const unsigned int TYPE_OUT_UNIDIRECTIONAL = 2;
             static const unsigned int TYPE_OUT_BIDIRECTIONAL = 3;
-            /** 
-             * Data structure, it can store a node id plus a 2-bit flag that 
+            /**
+             * Data structure, it can store a node id plus a 2-bit flag that
              * allows a more space efficient storage of shortcuts.
-             */ 
+             */
             struct Data
             {
                 unsigned int type:2;
                 unsigned int id:30;
             };
-            istream& _in;   
+            istream& _in;
             NodeID _lastNode;
             NodeID _lastIn;
             Data _data;
@@ -645,8 +645,8 @@ namespace processing {
                 _preEof = _in.eof();
             }
         };
-        
-        /** 
+
+        /**
          * Store witness paths in a file (binary format), those are used to speedup the hierarchy construction
          * in a second step, see Construct.h. (only preliminary)
          */
@@ -656,7 +656,7 @@ namespace processing {
             StoreWitnesses(): _out(NULL), _lastIn(SPECIAL_NODEID), _lastNode(SPECIAL_NODEID) { }
             /** Output stream to store witness paths to. */
             void store(ostream& out) { _out = &out; }
-            /** 
+            /**
              * Write the initial information of a witness path to file, it omits the (middle) node and the input node if
              * it is the same as the previous path. This is achieved using flags.
              */
@@ -683,8 +683,8 @@ namespace processing {
                     _out->write((char*)&data,sizeof(Data)/sizeof(char));
                 }
             }
-            
-            /** 
+
+            /**
              * Store the next step (node) of the path.
              */
             void nextStep(const NodeID step)
@@ -695,11 +695,11 @@ namespace processing {
                     _out->write((char*)&data,sizeof(Data)/sizeof(char));
                 }
             }
-                
+
             private:
             // Node id is the contracted node.
             static const unsigned int TYPE_NODE = 0;
-            // Node id is a source node, as contracted node the previously 
+            // Node id is a source node, as contracted node the previously
             // written contracted node is used.
             static const unsigned int TYPE_IN = 1;
             // Node id is the target node, as contracted node and source
@@ -708,22 +708,22 @@ namespace processing {
             // Node id is the next node on the witness path having the contracted node, source
             // and target node the previously written nodes used.
             static const unsigned int TYPE_STEP = 3;
-            /** 
-             * Data structure, it can store a node id plus a 2-bit flag that 
+            /**
+             * Data structure, it can store a node id plus a 2-bit flag that
              * allows a more space efficient storage of witness paths, see beginWitness()
-             */ 
+             */
             struct Data
             {
                 Data(unsigned int type, unsigned int id): type(type), id(id) { }
                 unsigned int type:2;
                 unsigned int id:30;
             };
-            ostream* _out;   
+            ostream* _out;
             NodeID _lastIn;
             NodeID _lastNode;
         };
-        
-        /** 
+
+        /**
          * Retrieve witness paths from file (binary format), those are used to speedup the hierarchy construction.
          * (only preliminary)
          */
@@ -737,7 +737,7 @@ namespace processing {
                 _preEof = _in.eof();
                 read();
             }
-            
+
             /**
              * The witness paths are stored in the order that they are needed during construction,
              * see StoreWitnesses.
@@ -770,7 +770,7 @@ namespace processing {
                 if ( !peek ) read();
                 return true;
             }
-            
+
             /**
              * Returns the nodes within the witness paths.
              * @return true as long as there is a step, used in a while-loop.
@@ -793,7 +793,7 @@ namespace processing {
                 if ( !_preEof )
                 {
                     assert( !_in.eof() );
-                    _in.read((char*)&_data, sizeof(Data)/sizeof(char));   
+                    _in.read((char*)&_data, sizeof(Data)/sizeof(char));
                 }
                 _eof = _preEof;
                 _preEof = _in.eof();
@@ -801,7 +801,7 @@ namespace processing {
             private:
             // Node id is the contracted node.
             static const unsigned int TYPE_NODE = 0;
-            // Node id is a source node, as contracted node the previously 
+            // Node id is a source node, as contracted node the previously
             // read contracted node is used.
             static const unsigned int TYPE_IN = 1;
             // Node id is the target node, as contracted node and source
@@ -810,16 +810,16 @@ namespace processing {
             // Node id is the next node on the witness path having the contracted node, source
             // and target node the previously read nodes used.
             static const unsigned int TYPE_STEP = 3;
-            /** 
-             * Data structure, it can store a node id plus a 2-bit flag that 
+            /**
+             * Data structure, it can store a node id plus a 2-bit flag that
              * allows a more space efficient storage of witness paths.
-             */ 
+             */
             struct Data
             {
                 unsigned int type:2;
                 unsigned int id:30;
             };
-            istream& _in;   
+            istream& _in;
             NodeID _lastNode;
             NodeID _lastIn;
             NodeID _lastOut;
@@ -827,21 +827,21 @@ namespace processing {
             bool _eof;
             bool _preEof;
         };
-        
-        
-    
+
+
+
         // graph datastructure, usually a UpdateableGraph is used, see ../datastr/graph/UpdateableGraph.h
         Graph* _graph;
-        
+
         // Contains the coefficients for the linear combination of the priority and the local search and hop limits.
         WeightCalculation _weightCalc;
 
         // Contains the local search and hop limits used during hierarchy construction if node order is given.
         ContractParameters _contractParams;
-        
+
         // Priority queue used for node order calculation.
         BinaryHeap< EliminationWeight::Type, EliminationWeight, PQueueNodeElimination, NodeID > _pqElimination;
-            
+
         // Dijkstra algorithm used for local searches during contraction, see DijkstraCH.h
         LocalDijkstraContract _localDijkstra;
 
@@ -849,51 +849,51 @@ namespace processing {
         EdgeID _noOfEdges;
         // number of nodes in the remaining (not contracted) graph
         NodeID _noOfNodes;
-        
+
         // For debugging purpose only, perform time-consuming test during hierarchy creation.
         bool _testShortestPaths;
-        
+
         // Store betweeness value, node id as index.
         vector<BetweennessValue>* _betweenness;
         // Store reach value, node id as index.
         vector<ReachValue>* _reach;
-        
+
         // Array for new edges, used in processNode().
         vector<NewEdge> _newEdges;
-        
+
         // Filename prefix for statistic files.
         string _statsFile;
         // Output filestream for main statistic file that contains a line for each
         // contracted node. Template parameter saveStats needs to be enabled.
         ofstream _stats;
-        
+
         // Output filestream, each line starts with the contracted node
-        // followed by the incident nodes of all shortcuts. Template parameter 
+        // followed by the incident nodes of all shortcuts. Template parameter
         // saveShortcutsText needs to be enabled.
         ofstream _shortcutsText;
-        
+
         // Output filestream, used to calculate the size of the stored witnesses
         // if stored as trees of shortcuts. Only for testing.
         ofstream _tree;
-        
+
         // Objects to store shortcuts and witness paths to file. Template parameter
         // saveShortcutsWitnesses needs to be enabled.
         StoreShortcuts _storeShortcuts;
         StoreWitnesses _storeWitnesses;
-        
+
         // Counts the number of witnesses (value) with given length (index). those
         // values will be written to file if template parameter saveStats is enabled.
         vector<unsigned int> _witnessCounter;
         // Same as _witnessCounter, but does regard (as index) the number of settled
         // nodes during local search until a witness is found.
         vector<unsigned int> _witnessSearchSpaceCounter;
-        
+
         // Current level during contraction.
         unsigned int _currentLevel;
-        
+
         // Switch deciding wheter lazy updates are enabled.
         bool _lazyUpdate;
-        
+
         // Current hop-limit for local searches. 0 = no hop-limit.
         unsigned int _maxHops;
         // Current degree-limit that will trigger a hop-limit change.
@@ -903,7 +903,7 @@ namespace processing {
         unsigned int _maxHopsIndex;
         // Use local edge reduction.
         bool _localReduceEdges;
-        
+
         // Dijkstra object to update Voronoi regions. The Voronoi region of the contracted
         // node is distributed among the neighboring regions based on shortest paths.
         DijkstraUpdateVoronoi _dVoronoi;
@@ -924,7 +924,7 @@ namespace processing {
         stPairs _testRuns;
         vector<Path> _testPaths;
         processing::DijkstraCH<datastr::graph::UpdateableGraph, DynQueryPQueue, 2, true> _testDijkstra;
-    
+
         /**
          *  Maps node id to index into priority queue _pqElimination.
          *  Since the priority queue is initalized by ascending node id,
@@ -934,7 +934,7 @@ namespace processing {
         {
             return node + 1;
         }
-        
+
         /**
          *  Maps index of the priority queue _pqElimination to the node id.
          *  Since the priority queue is initalized by ascending node id,
@@ -945,7 +945,7 @@ namespace processing {
             assert( index >= 1 );
             return index - 1;
         }
-        
+
         /**
          * Returns the data stored with each node (element) index
          * the priority queue. Note that this data is still available
@@ -954,7 +954,7 @@ namespace processing {
         PQueueNodeElimination& pqData(NodeID node)
         {
             assert( pqNodeToIndex(node) < _pqElimination.elements().size() );
-            return _pqElimination.elements()[pqNodeToIndex(node)].data();   
+            return _pqElimination.elements()[pqNodeToIndex(node)].data();
         }
 
         /**
@@ -964,38 +964,38 @@ namespace processing {
             VERBOSE( cout << "Initialize elimination weights..." << endl );
             VERBOSE( double timeStart = timestamp(); );
             VERBOSE( double timeLast = timestamp(); );
-            
+
             // initalize statistical variables
             _noOfEdges = 0;
             _noOfNodes = 0;
-            
+
             // Prepare hop-limits, since staged hop-limits are used that change
             // after reaching certain average degrees, some overhead is required.
             initHopLimit(_weightCalc.maxHops);
 
             // start with level 0, the most unimportant level
             _currentLevel = 0;
-            
+
             // enable lazy update if the check interval > 0
             _lazyUpdate = _weightCalc.lazyUpdateRecalcLimit > 0;
-            
-            // need to init wittness array for fast mtm 2 hops search            
+
+            // need to init wittness array for fast mtm 2 hops search
             // if a 2-hop search is in the list of hop-limits
             initPossibleWitnessesMTM(_weightCalc.maxHops);
 
             // initalize memory for priority queue, important for large graphs otherwise the memory
             // becomes fragmented and a bad_malloc occurs.
             _pqElimination.reserve( _graph->noOfNodes() );
-            
+
             VERBOSE( Percent percent( _graph->noOfNodes() ) );
-            
+
             // Nodes are inserted into the priority queue by ascending node id.
             // This allows a simple mapping from node id to index of the priority queue
             // element.
             for ( NodeID node = 0; node < _graph->noOfNodes(); node++ )
             {
-                VERBOSE( 
-                    if (node > 0 && node % PROGRESS_NODES_INIT == 0) 
+                VERBOSE(
+                    if (node > 0 && node % PROGRESS_NODES_INIT == 0)
                     {
                         double now = timestamp();
                         cout << node << " nodes, " << (now-timeStart) << " seconds, " ;
@@ -1005,9 +1005,9 @@ namespace processing {
                         timeLast = now;
                     }
                 )
-                    
+
                 VERBOSE_CONTRACT( cout << "node " << node << flush;)
-                
+
 
                 // Calculate elimination weight/priority. Some priority terms are returned
                 // that need to be stored for each node for later priority updates.
@@ -1016,13 +1016,13 @@ namespace processing {
                 int edgeDiff;
                 unsigned int newEdges;
                 EliminationWeight::Type weight = calculateEliminationWeight<PHASE_NODEORDER_INIT>(node, &searchSpace, &edgeDiff, &newEdges);
-                    
+
                 // insert node into priority queue
                 VERBOSE_CONTRACT( time1 = timestamp() - time1; )
                 VERBOSE_CONTRACT( cout << " calc " << fixed << setprecision(3) << time1 * 1000 << flush; )
                 _pqElimination.insert(weight);
                 //assert( index == pqNodeToIndex(node) );
-                
+
                 // store priority terms (node information) in the data structure assigned
                 // to each node, required for later priority updates.
                 PQueueNodeElimination& data = pqData(node);
@@ -1038,17 +1038,17 @@ namespace processing {
                 VERBOSE_CONTRACT( cout << endl; )
                 VERBOSE( percent.printStatus(node) );
             }
-            
+
             VERBOSE( cout << "#nodes: " << _noOfNodes << " / #edges: " << _noOfEdges << endl; )
             assert( _pqElimination.checkHeapProperty() );
 
         }
-        
 
-        
-        /** 
+
+
+        /**
          * Calculates the elimination weight (priority) of a remaining node in the current
-         * state of contraction. The priority is a linear combination of several 
+         * state of contraction. The priority is a linear combination of several
          * priority terms.
          * There are several return values (call-by-reference) that are
          * returned, if != NULL.
@@ -1056,8 +1056,8 @@ namespace processing {
          *        to the priority queue is allowed since not all nodes have been inserted.
          */
         template < ConstructPhase phase >
-        EliminationWeight::Type calculateEliminationWeight(const NodeID node, 
-            unsigned int* searchSpaceResult = NULL, int* edgeDiffResult = NULL, 
+        EliminationWeight::Type calculateEliminationWeight(const NodeID node,
+            unsigned int* searchSpaceResult = NULL, int* edgeDiffResult = NULL,
             unsigned int* newEdgesResult = NULL)
         {
             // variables representing several priority terms
@@ -1072,17 +1072,17 @@ namespace processing {
             {
                 deletedNeighbors = pqData(node).deletedNeighbors;
             }
-            
+
             // Perform a simulated contraction of node to calculate several priority terms. This
             // yields e.g. the edge difference. The second template parameter, here true, specifies
             // the simulation.
-            processNode<phase,true>(node,&searchSpace, &edgeDiff, &newEdges, &inDegree, &outDegree, 
+            processNode<phase,true>(node,&searchSpace, &edgeDiff, &newEdges, &inDegree, &outDegree,
                 &shortcutOriginalEdgeSum);
-            
+
             if (searchSpaceResult != NULL) *searchSpaceResult = searchSpace;
             if (edgeDiffResult != NULL) *edgeDiffResult = edgeDiff;
             if (newEdgesResult != NULL) *newEdgesResult = newEdges;
-                
+
             // Result will contain the priority.
             // Priority terms: edge difference, number of new edges, deleted neighbors, search space of local searches
             EliminationWeight::Type result = ((EliminationWeight::Type)edgeDiff*_weightCalc.edgeDiffMult
@@ -1100,12 +1100,12 @@ namespace processing {
                 }
                 result += sqrt(((EliminationWeight::Type)voronoiNumber)*_weightCalc.voronoiMult);
             }
-                    
-            // Upper bound on search paths found by query algorithm. There is a command-line 
+
+            // Upper bound on search paths found by query algorithm. There is a command-line
             // argument (-T) that changes the behaviour to time-dependend queries. In this case,
             // the log10(+1) is used since the priority term eventually exceeds even a long for
             // the PTV Western Europe road network.
-            if ( _weightCalc.searchPathHopBorderMult != 0) 
+            if ( _weightCalc.searchPathHopBorderMult != 0)
             {
                 if ( phase != PHASE_NODEORDER_INIT )
                 {
@@ -1119,7 +1119,7 @@ namespace processing {
                     }
                 }
             }
-                    
+
             // Relative betweenness, the fraction of remaining nodes with smaller betweenness
             // is the priority term in [0,1] and thus needs an approriate wheight.
             if (_weightCalc.betweennessAdd != 0)
@@ -1132,16 +1132,16 @@ namespace processing {
             {
                 result += calculateSmallerNeighbors(node, _reach)*_weightCalc.reachAdd;
             }
-                
+
             // count the original edges, the shortcuts added during the simulated contraction represent
             if (_weightCalc.shortcutOriginalEdgeSumMult != 0)
             {
                 result += _weightCalc.shortcutOriginalEdgeSumMult*sqrt((EliminationWeight::Type)shortcutOriginalEdgeSum);
             }
-                            
+
             return result;
         }
-        
+
         /**
          * Calculates the fraction of neighbors that have smaller value in vector values than unsigned.
          * Used to calculate the priority term for relative betweenness and reach.
@@ -1171,9 +1171,9 @@ namespace processing {
             }
             return noOfNeighbors == 0 ? 0 : (double)noOfSmallNeighbors/noOfNeighbors;
         }
-        
-       
-        /** 
+
+
+        /**
          * Calculates the elimination weight (priority) of node and updates the priority queue accordingly.
          */
         EliminationWeight::Type updateEliminationWeight(NodeID node, unsigned int* searchSpaceResult = NULL,
@@ -1182,12 +1182,12 @@ namespace processing {
             unsigned int searchSpace = 0;
             int edgeDiff = 0 ;
             unsigned int newEdges = 0;
-            
+
             // calculate elimination weight (priority), this only happens during the elimiation phase
             // (PHASE_NODEORDER_ELIMINATION), the other nodeorder phase is the initalization phase.
-            EliminationWeight::Type newWeight = calculateEliminationWeight<PHASE_NODEORDER_ELIMINATE>(node, 
+            EliminationWeight::Type newWeight = calculateEliminationWeight<PHASE_NODEORDER_ELIMINATE>(node,
                 &searchSpace, &edgeDiff, &newEdges);
-                
+
             // update the priority queue key and data
             _pqElimination.updateKey( pqNodeToIndex(node), newWeight);
             pqData(node).searchSpace = searchSpace;
@@ -1198,13 +1198,13 @@ namespace processing {
             if (newEdgesResult != NULL) *newEdgesResult = newEdges;
             return newWeight;
         }
-        
 
-        /** 
+
+        /**
          * Update the priorities of all remaining nodes in the priority queue.
          * This happens after a hop-limit change or too many lazy update within
          * the check interval.
-         * 
+         *
          */
         void updatePQueue()
         {
@@ -1217,9 +1217,9 @@ namespace processing {
             {
                 if (! pqData(v).isEliminated() )
                 {
-                    
-                    VERBOSE( 
-                        if (i > 0 && i % PROGRESS_NODES_INIT == 0) 
+
+                    VERBOSE(
+                        if (i > 0 && i % PROGRESS_NODES_INIT == 0)
                         {
                             double now = timestamp();
                             cout << i << " nodes, " << (now-timeStart) << " seconds, " ;
@@ -1231,14 +1231,14 @@ namespace processing {
                     )
 
                     updateEliminationWeight(v);
-                    
+
                     VERBOSE( percent.printStatus(i) );
                     i++;
                 }
             }
         }
-        
-        /** 
+
+        /**
          * Main phase: node contraction by priority queue.
          * Always the node with the lowest priority is contracted.
          */
@@ -1249,7 +1249,7 @@ namespace processing {
             // Save statistics to file
             if (_statsFile != "")
             {
-                if (saveStats != SAVE_STATS_NONE) 
+                if (saveStats != SAVE_STATS_NONE)
                 {
                     _stats.open((_statsFile+".contract").c_str());
                     if (!_stats.is_open()) { cerr << "Cannot write to " << (_statsFile+".contract") << endl; exit(1); }
@@ -1261,7 +1261,7 @@ namespace processing {
                     }
                 }
 
-                if (saveShortcutsText) 
+                if (saveShortcutsText)
                 {
                     _shortcutsText.open((_statsFile+".shortcuts").c_str());
                     if (!_shortcutsText.is_open()) { cerr << "Cannot write to " << (_statsFile+".shortcuts") << endl; exit(1); }
@@ -1281,13 +1281,13 @@ namespace processing {
             // if there are too many lazy updates during a check interval
             // the whole priority queue is updated
             NodeID lastLazyUpdateCounter = 0;
-            
+
             // Main loop: in each loop run, exactly one node is eliminated
             //            so this loop is executed noOfNodes() times.
             while (_pqElimination.min() != EliminationWeight::MAX_VALUE) {
 
-                VERBOSE( 
-                    if (i > 0 && _noOfNodes > 0 && i % PROGRESS_NODES_ELIMINATE == 0) 
+                VERBOSE(
+                    if (i > 0 && _noOfNodes > 0 && i % PROGRESS_NODES_ELIMINATE == 0)
                     {
                         double now = timestamp();
                         cout << i << " nodes, " << (now-timeStart) << " seconds, " ;
@@ -1299,7 +1299,7 @@ namespace processing {
                         timeLast = now;
                     }
                 )
-                
+
                 // lazy update: update min element, only remove it if it is still the min element
                 if (_lazyUpdate)
                 {
@@ -1318,7 +1318,7 @@ namespace processing {
                     
                     NodeID index = _pqElimination.minElement();
                     NodeID node = pqIndexToNode(index);
-                    
+
                     // recalculate the elimination weight (priority) of the currently
                     // topmost (most unimportant) node, if it does not equals the
                     // stored priority, repeat this step with the now topmost node
@@ -1329,10 +1329,10 @@ namespace processing {
                         VERBOSE_CONTRACT( cout << "resubmit " << oldWeight << " != " << newWeight << endl; )
                         lazyUpdateCounter++;
                         VERBOSE( if (lazyUpdateCounter % PROGRESS_NODES_ELIMINATE == 0) cout << lazyUpdateCounter << " lazy updates" << endl; )
-                            
+
                         // If the topmost node remains the same but had a different priority than
                         // stored, another update is not necessary. However the lazyUpdateCounter
-                        // should be increased, so this condition is not checked at the entrance 
+                        // should be increased, so this condition is not checked at the entrance
                         // of the loop.
                         if ( index == _pqElimination.minElement() ) break;
                         index = _pqElimination.minElement();
@@ -1341,32 +1341,32 @@ namespace processing {
                         newWeight = updateEliminationWeight(node);
                     }
                 }
-                
+
                 VERBOSE_CONTRACT( cout << "[" << i << "]"; )
                 if (saveStats != SAVE_STATS_NONE && _stats.is_open())
                 {
                     _stats << fixed << setprecision(0) << _pqElimination.min() << " ";
                 }
-                    
+
                 double time1, time2;
                 if (saveStats != SAVE_STATS_NONE) time1 = timestamp();
-                
+
                 // remove topmost node with lowest priority from priority queue
                 NodeID index = _pqElimination.deleteMin();
                 NodeID node = pqIndexToNode(index);
-                
+
                 if (saveStats != SAVE_STATS_NONE) time1 = timestamp() - time1;
                 VERBOSE_CONTRACT( cout << " node " << node << flush; )
                 VERBOSE_CONTRACT( if (saveStats != SAVE_STATS_NONE) cout << " delete " << fixed << setprecision(3) << time1 * 1000 << flush; )
                 if (saveStats != SAVE_STATS_NONE) time2 = timestamp();
-                
+
                 unsigned int searchSpace;
                 int edgeDiff;
                 unsigned int newEdges;
                 unsigned int inDegree;
                 unsigned int outDegree;
                 unsigned int voronoiNumber = pqData(node).voronoiNumber;
-                
+
                 // process node, meaning contraction (adds shortcuts),
                 // update of level of node and update of priority of neighbors
                 processNode<PHASE_NODEORDER_ELIMINATE,false>(node, &searchSpace, &edgeDiff, &newEdges, &inDegree, &outDegree);
@@ -1414,11 +1414,11 @@ namespace processing {
             }
 
             assert( _graph->checkReverseGraphExists() );
-            
+
             if (_stats.is_open()) _stats.close();
             if (_shortcutsText.is_open()) _shortcutsText.close();
             if (_tree.is_open()) _tree.close();
-            
+
             // statistics: Store witness counter to file. Those counters
             // are in two global vectors and have been filled in processNode().
             if (saveStats == SAVE_STATS_ALL)
@@ -1441,9 +1441,9 @@ namespace processing {
 
             VERBOSE( cout << "#edges: " << _graph->noOfExistingEdges() << " / " << _graph->noOfEdges() << endl );
         }
-        
-        
-        /** 
+
+
+        /**
          * Create a contraction hierarchy if the node order (levels) is already given.
          * Basically this is one loop where each node is contracted, ascending
          * by importance (level).
@@ -1455,26 +1455,26 @@ namespace processing {
             // insert all nodes in max level
             // so local search will only regard not already processed nodes
             // this is already done in importGraphListOfEdgesUpdateable
-            
+
             VERBOSE( double timeStart = timestamp(); );
             VERBOSE( double timeLast = timestamp(); );
 
             VERBOSE( Percent percent(_graph->noOfNodes() ) );
-            
+
             _currentLevel = 0;
 
             // Prepare hop-limits, since staged hop-limits are used that change
             // after reaching certain average degrees, some overhead is required.
             initHopLimit(_contractParams.maxHops);
-            
-            // need to init wittness array for fast mtm 2 hops search            
+
+            // need to init wittness array for fast mtm 2 hops search
             // if a 2-hop search is in the list of hop-limits
             initPossibleWitnessesMTM(_contractParams.maxHops);
 
             NodeID k = 0;
             while ( k < _graph->noOfNodes()  && _noOfNodes > _contractParams.coreSize) {
-                VERBOSE( 
-                    if (k > 0 && k % PROGRESS_NODES_CONSTRUCT == 0) 
+                VERBOSE(
+                    if (k > 0 && k % PROGRESS_NODES_CONSTRUCT == 0)
                     {
                         double now = timestamp();
                         cout << k << " nodes, " << (now-timeStart) << " seconds, " ;
@@ -1486,18 +1486,18 @@ namespace processing {
                         timeLast = now;
                     }
                 )
-                
-                // contract nodes by level.                
+
+                // contract nodes by level.
                 assert( k < _levelNodeList.size() );
                 NodeID u = _levelNodeList[k].second;
                 assert( u < _graph->noOfNodes() );
                 VERBOSE_CONTRACT( cout << "[" << k << "]" << flush; )
                 VERBOSE_CONTRACT( cout << " node " << u << flush; )
                 VERBOSE_CONTRACT( double time1 = timestamp(); )
-                
+
                 // *** Main step: Node contraction ***
                 processNode<PHASE_CONSTRUCT, false>(u);
-                
+
                 VERBOSE_CONTRACT( time1 = timestamp() - time1; )
                 VERBOSE_CONTRACT( cout << " eliminate " << fixed << setprecision(3) << time1 * 1000 << flush; )
                 VERBOSE_CONTRACT( cout << endl; )
@@ -1508,11 +1508,11 @@ namespace processing {
                 {
                     VERBOSE( cout << "Switch to max hops " << _maxHops << " after " << (k+1) << " nodes, avg degree: " << ((double)_noOfEdges/_noOfNodes) << ", " << (timestamp()-timeStart) << " seconds" << endl; )
                 }
-                
+
                 k++;
-                
+
                 _currentLevel++;
-                
+
                 VERBOSE( percent.printStatus(k) );
             }
 
@@ -1520,8 +1520,8 @@ namespace processing {
             VERBOSE( cout << "#edges: " << _graph->noOfExistingEdges() << " / " << _graph->noOfEdges() << endl );
             VERBOSE( cout << "max avg degree: " << _maxAvgDegree << endl; )
         }
-        
-        /** 
+
+        /**
          * Create a contraction hierarchy if the node order (levels) is already given
          * and additionally all shortcuts and witness paths used during the node ordering.
          * The idea was to use this information to create a hierarchy for a graphs
@@ -1542,7 +1542,7 @@ namespace processing {
             // insert all nodes in max level
             // so local search will only regard not already processed nodes
             // this is already done in importGraphListOfEdgesUpdateable
-            
+
             VERBOSE( double timeStart = timestamp(); );
             VERBOSE( double timeLast = timestamp(); );
 
@@ -1561,31 +1561,31 @@ namespace processing {
                 VERBOSE( now = timestamp(); )
                 VERBOSE( cout << (now-timeStart) << " seconds, " << (now-timeLast) << " last" << endl; )
                 VERBOSE( timeLast = now; )
-    
+
                 VERBOSE( cout << "Add witness-shortcuts..." << endl );
                 addWitnessShortcuts(rWitnesses);
                 VERBOSE( now = timestamp(); )
                 VERBOSE( cout << (now-timeStart) << " seconds, " << (now-timeLast) << " last" << endl; )
                 VERBOSE( timeLast = now; )
                 VERBOSE( cout << "Validate witnesses..." << endl );
-            }   
+            }
             else
-            {             
+            {
                 VERBOSE( cout << "Check witnesses..." << endl );
             }
 
-            // two hop search for new shortcuts            
+            // two hop search for new shortcuts
             _possibleWitnesses.clear();
             _possibleWitnesses.resize(_graph->noOfNodes(), Weight::MAX_VALUE);
 
             VERBOSE( Percent percent(_graph->noOfNodes() - 2) );
-            
+
             _currentLevel = 0;
-            
+
             NodeID k = 0;
             while ( k < _graph->noOfNodes() ) {
-                VERBOSE( 
-                    if (k > 0 && k % PROGRESS_NODES_CONSTRUCT == 0) 
+                VERBOSE(
+                    if (k > 0 && k % PROGRESS_NODES_CONSTRUCT == 0)
                     {
                         now = timestamp();
                         cout << k << " nodes, " << (now-timeStart) << " seconds, " ;
@@ -1596,26 +1596,26 @@ namespace processing {
                         timeLast = now;
                     }
                 )
-                
+
                 NodeID u = _levelNodeList[k].second;
                 VERBOSE_CONTRACT( cout << "[" << k << "]" << flush; )
                 VERBOSE_CONTRACT( cout << " node " << u << flush; )
                 VERBOSE_CONTRACT( double time1 = timestamp(); )
-                
-                
+
+
                 // Shortcuts and "witness shortcuts" are already added to the graph.
                 // Only a limited local search is necessary.
                 if ( !onTheFlyWitnessCheck )
                 {
                     validateWitnesses(u);
                 }
-                // Perform contraction but try to avoid local searches and use 
+                // Perform contraction but try to avoid local searches and use
                 // the stored information (shortcuts, witnesses) instead.
                 else
                 {
                     checkWitnesses(u, rWitnesses);
                 }
-                
+
                 _graph->node(u).setLevel(_currentLevel);
                 _graph->changeNodeLevelOnlyReverseEdges(u);
                 VERBOSE_CONTRACT( time1 = timestamp() - time1; )
@@ -1624,13 +1624,13 @@ namespace processing {
 
                 k++;
                 _currentLevel++;
-                
+
                 VERBOSE( percent.printStatus(k) );
             }
             assert( _graph->checkReverseGraphExists() );
-            
+
             VERBOSE( cout << "#edges: " << _graph->noOfExistingEdges() << " / " << _graph->noOfEdges() << endl );
-            
+
         }
 
         /**
@@ -1648,7 +1648,7 @@ namespace processing {
             {
                 _maxHops = (unsigned int)maxHops[_maxHopsIndex];
                 _maxHopsIndex++;
-                
+
                 if ( _maxHopsIndex < maxHops.size() )
                 {
                     _maxHopsDegreeLimit = maxHops[_maxHopsIndex];
@@ -1656,9 +1656,9 @@ namespace processing {
                 }
             }
         }
-        
+
         /**
-         * Performs a hop-limit switch based on average-degree-limits. It also keeps track of the 
+         * Performs a hop-limit switch based on average-degree-limits. It also keeps track of the
          * maximum average degree during contraction.
          * @return if a switch occured.
          */
@@ -1675,7 +1675,7 @@ namespace processing {
                 {
                     _maxHops = (unsigned int)maxHops[_maxHopsIndex];
                     _maxHopsIndex++;
-                    
+
                     if ( _maxHopsIndex < maxHops.size() )
                     {
                         _maxHopsDegreeLimit = maxHops[_maxHopsIndex];
@@ -1693,7 +1693,7 @@ namespace processing {
         // many-to-many algorithm, see the diploma thesis for a theoretical
         // description.
         // ***
-        
+
         /**
         * The bucket entries of a node are stored as a linked list in an array (vector).
         * It contains the node and the distance from this node. The target node
@@ -1737,7 +1737,7 @@ namespace processing {
 
         /**
         * First step of the 2-hop many-to-many search. The incoming edges (x,v)
-        * from each node v that is incident to a outgoing edge (node,v) of the 
+        * from each node v that is incident to a outgoing edge (node,v) of the
         * currently processed node are scanned and the distance d(x,v) is stored
         * in the bucket b(x) along with v. The currently processed node (node)
         * is ignored.
@@ -1867,14 +1867,14 @@ namespace processing {
                     _graph->node(edge.target()).pqElement(0);
                 }
             }
-            _linkedListMTM.clear();                    
+            _linkedListMTM.clear();
         }
-        
+
         /**
          * Stores a new shortcut edge in the buffer for new edges. These adges are added to the graph
          * after all shortcuts for the contraction of a node are found.
          */
-        void prepareNewShortcutEdge(const NodeID node, const EdgeID firstEdge, const EdgeID lastEdge, 
+        void prepareNewShortcutEdge(const NodeID node, const EdgeID firstEdge, const EdgeID lastEdge,
             const EdgeID eIn, const Edge& edgeIn, const EdgeID eOut, const Edge& edgeOut)
         {
             // On bidirectional shortcuts, only insert one bidirectional
@@ -1885,10 +1885,10 @@ namespace processing {
             if (!b)
             {
                 b = true;
-                for ( typename vector<NewEdge>::iterator iter = _newEdges.begin(); 
+                for ( typename vector<NewEdge>::iterator iter = _newEdges.begin();
                       b && iter != _newEdges.end(); iter++ )
                 {
-                    if (iter->source == edgeOut.target() 
+                    if (iter->source == edgeOut.target()
                         && iter->edge.target() == edgeIn.target()
                         && iter->edge.weight() == (edgeIn.weight() + edgeOut.weight()))
                     {
@@ -1906,22 +1906,22 @@ namespace processing {
                 // if supported by the edge datastructure. And also the
                 // number of original edges a shortcut represent, is stored
                 // using the attribute shortcutOriginalEdgeCount.
-                _newEdges.push_back( NewEdge( edgeIn.target(), edgeOut.target(), 
+                _newEdges.push_back( NewEdge( edgeIn.target(), edgeOut.target(),
                         edgeIn.weight() + edgeOut.weight(), false /* unidirectional */,
                         node, eIn-firstEdge, eOut-firstEdge,
                         edgeIn.shortcutOriginalEdgeCount() + edgeOut.shortcutOriginalEdgeCount() ) );
             }
         }
-        
+
         /**
          * Perform a local edge reduction using the information stored in the Dijkstra object
          * used for local searches. Only edges (v,x) that are not on any shortest path
-         * since their weight is larger than the shortest path distance between v and x, 
+         * since their weight is larger than the shortest path distance between v and x,
          * are removed.
          */
         void reduceEdgesLocal(const NodeID node, const Edge& edgeIn)
         {
-            // reduce edges, process edges descending because otherwise it 
+            // reduce edges, process edges descending because otherwise it
             // will cause problems at removal (rearrangeing of edges)
             EdgeID rE = _graph->lastEdge(edgeIn.target());
             if (rE > 0)
@@ -1943,7 +1943,7 @@ namespace processing {
                             // Special case: need to consider bidirectional flags. We can unly
                             // remove unidirectional edges, but bidirectional edges becomes
                             // one-way. Also the reverse edge in the graph data structure
-                            // needs to be considered since each edge is stored in the 
+                            // needs to be considered since each edge is stored in the
                             // adjacency array of both incident nodes.
                             if ( rEdge.isBidirected() )
                             {
@@ -1960,24 +1960,24 @@ namespace processing {
                             }
                         }
                     }
-                    if (rE == 0) break;                                
+                    if (rE == 0) break;
                 }
             }
         }
-         
+
         /**
          * Store a witness path to file to use it in a later hiearchy construction.
          * Also some statistics for witnesses are accumulated if a template
          * parameter is enabled.
-         */   
+         */
         void storeWitness(const NodeID node, const Edge& edgeIn, const Edge& edgeOut)
         {
             if ( (saveStats == SAVE_STATS_ALL || saveShortcutsWitnesses) )
             {
-                
+
                 NodeID current = edgeOut.target();
                 const vector<NodeID>& settledNodes = _localDijkstra.settledNodes(0);
-                
+
                 if (saveStats == SAVE_STATS_ALL)
                 {
                     NodeID index = 0;
@@ -1986,14 +1986,14 @@ namespace processing {
                         index++;
                         assert( index < settledNodes.size() );
                     }
-                    if (_witnessSearchSpaceCounter.size() <= index) 
+                    if (_witnessSearchSpaceCounter.size() <= index)
                     {
                         _witnessSearchSpaceCounter.resize(index, 0);
                     }
                     assert( index > 0 );
                     _witnessSearchSpaceCounter[index-1]++;
                 }
-                
+
                 if (saveStats == SAVE_STATS_ALL || saveShortcutsWitnesses)
                 {
                     unsigned int counter = 0;
@@ -2018,7 +2018,7 @@ namespace processing {
                     }
                     if (saveStats == SAVE_STATS_ALL)
                     {
-                        if (_witnessCounter.size() <= counter) 
+                        if (_witnessCounter.size() <= counter)
                         {
                             _witnessCounter.resize(counter, 0);
                         }
@@ -2028,12 +2028,12 @@ namespace processing {
                 }
             }
         }
-        
+
         /**
          * After the contraction of node, we usually update all neighbors of it.
          * This is only a heuristic but works quite well. Before we can actually
          * recalculate the elimination weight (priority), we need to update some
-         * attributes 
+         * attributes
          *   - the deleted neighbor counter
          *   - the upper limit on search path lengts
          *   - distribute the Voronoi region of the contracted nodes among the
@@ -2047,7 +2047,7 @@ namespace processing {
             NodeID previous = SPECIAL_NODEID;
             if (!_weightCalc.searchPathHopBorderOriginalEdges)
             {
-                // possibly new search path hops = upper bound of current node + 1 
+                // possibly new search path hops = upper bound of current node + 1
                 double newsearchPathHopBorder = pqData(node).searchPathHopBorder + 1;
                 assert( newsearchPathHopBorder >= pqData(node).searchPathHopBorder );
                 for ( EdgeID e = firstEdge; e < lastEdge; e++ )
@@ -2057,7 +2057,7 @@ namespace processing {
                     previous = edge.target();
 
                     pqData(edge.target()).deletedNeighbors++;
-                    
+
                     // increase upper search path hop bound, if necessary
                     if (pqData(edge.target()).searchPathHopBorder < newsearchPathHopBorder)
                     {
@@ -2065,7 +2065,7 @@ namespace processing {
                     }
                 }
             }
-            
+
             // This is an upper bound for the costs of the search paths by a time dependend search.
             // Requested by Veit Batz.
             else
@@ -2086,7 +2086,7 @@ namespace processing {
                     }
                 }
             }
-            
+
             // Update the Voronoi regions, meaning distribute the nodes in the Voronoi region of
             // the current node among the the neighboring Voronoi regions.
             if (_weightCalc.voronoiMult != 0 && _noOfNodes > 1)
@@ -2095,7 +2095,7 @@ namespace processing {
             }
 
             VERBOSE_CONTRACT( cout << " (" << flush; )
-            
+
             // Update weights of all neigbors.
             if ( !_weightCalc.updateHops )
             {
@@ -2103,7 +2103,7 @@ namespace processing {
                 // incoming and outgoing edge to this neighbor.
                 // The edges in the edge array are sorted by the node id
                 // of the incident node.
-                previous = SPECIAL_NODEID; 
+                previous = SPECIAL_NODEID;
                 for ( EdgeID e = firstEdge; e < lastEdge; e++ )
                 {
                     const Edge& edge = _graph->edge(e);
@@ -2133,7 +2133,7 @@ namespace processing {
                     NodeID v = bfs.top().first;
                     NodeID hops = bfs.top().second + 1;
                     bfs.pop();
-                    
+
                     NodeID vLastEdge = _graph->lastEdge(v);
                     for ( EdgeID e = _graph->firstLevelEdge(v); e < vLastEdge; e++ )
                     {
@@ -2146,21 +2146,21 @@ namespace processing {
                             //searchSpace += singleSearchSpace;
                             updatedNodes.push_back(edge.target());
                             _updateBfs[edge.target()] = true;
-                            
+
                             if ( hops < maxHops )
                             {
-                                bfs.push( make_pair( edge.target(), hops ) );   
+                                bfs.push( make_pair( edge.target(), hops ) );
                             }
                         }
                     }
                 }
                 for ( vector<NodeID>::const_iterator iter = updatedNodes.begin(); iter != updatedNodes.end(); iter++ )
                 {
-                    _updateBfs[*iter] = false;   
+                    _updateBfs[*iter] = false;
                 }
             }
         }
-            
+
 
         /**
         * Main procedure to contract a single node. Contracting a node means
@@ -2177,18 +2177,18 @@ namespace processing {
         * their decision to add a shortcut is always based on the distance
         * found between nodes incident to incoming and outgoing edges. And the
         * search always ignores the currently processed node.
-        * @param phase phase, PHASE_NODEORDER_INIT, PHASE_NODEORDER_ELIMINATE, 
+        * @param phase phase, PHASE_NODEORDER_INIT, PHASE_NODEORDER_ELIMINATE,
         *              PHASE_CONSTRUCT possible, during PHASE_NODEORDER_INIT
         *              is no access to the priority queue allowed since it just gets filled.
-        * @param simulateOnly only simulate contraction for weight calculation, see 
+        * @param simulateOnly only simulate contraction for weight calculation, see
         *                     calculateEliminationWeight()
         * @param node currently processed node
-        * The additional parameters are return values, that are filled 
+        * The additional parameters are return values, that are filled
         * if != NULL (call-by-reference).
         */
         template < ConstructPhase phase, bool simulateOnly >
-        void processNode(const NodeID node, unsigned int* searchSpaceResult = NULL, 
-            int* edgeDiffResult = NULL, unsigned int* newEdgesResult = NULL, 
+        void processNode(const NodeID node, unsigned int* searchSpaceResult = NULL,
+            int* edgeDiffResult = NULL, unsigned int* newEdgesResult = NULL,
             unsigned int* inDegreeResult = NULL, unsigned int* outDegreeResult = NULL,
             unsigned int* shortcutOriginalEdgeSum = NULL)
         {
@@ -2197,15 +2197,15 @@ namespace processing {
             // called target independent of the direction of the edge,
             // is already contracted/eliminated or not.
             //      firstEdge
-            //          .. 
-            //        (edges to contracted nodes) 
-            //          .. 
+            //          ..
+            //        (edges to contracted nodes)
+            //          ..
             //      firstLevelEdge
-            //          .. 
-            //        (edges to remaining nodes) 
-            //          .. 
+            //          ..
+            //        (edges to remaining nodes)
+            //          ..
             //      lastEdge
-            EdgeID firstEdge = _graph->firstLevelEdge(node); 
+            EdgeID firstEdge = _graph->firstLevelEdge(node);
             EdgeID lastEdge = _graph->lastEdge(node);
 
             // We sort the edges so we can process them more efficiently. This
@@ -2298,14 +2298,14 @@ namespace processing {
                 //   - local Dijkstra search with 1-hop backward search
                 //   - local Dijkstra search
                 // ***
-                
+
                 // 1-hop search
                 // ------------
                 // This is a simple scan of the adjacency array.
                 if (_maxHops == 1)
                 {
                     // The search is implemented as a triply nested loop.
-                    // First loop:  Scan edge array of node for nodes incident to 
+                    // First loop:  Scan edge array of node for nodes incident to
                     //              incoming edges (v,node)
                     // Second loop: Scan edge array of node for nodes incident to
                     //              outgoing edges (node,w)
@@ -2319,7 +2319,7 @@ namespace processing {
 
                         EdgeID inFirstEdge = _graph->firstLevelEdge(edgeIn.target());
                         EdgeID inLastEdge = _graph->lastEdge(edgeIn.target());
-                        
+
                         if ( phase == PHASE_NODEORDER_INIT || phase == PHASE_NODEORDER_ELIMINATE )
                         {
                             searchSpace += inLastEdge-inFirstEdge;
@@ -2350,7 +2350,7 @@ namespace processing {
                             // If no witness path is found, after the contraction of node,
                             // shortest paths distance would possibly increase. The countermeasure
                             // is to add a shortcut edge with the length of the shortest path.
-                            // Since the search is limted, sometimes shortcuts are added, 
+                            // Since the search is limted, sometimes shortcuts are added,
                             // that are not necessary. But they do not invalidate the correctness.
                             if ( !foundWitness )
                             {
@@ -2391,7 +2391,7 @@ namespace processing {
 
                         // Fill _possibleWitnesses vector.
                         findPossibleWitnessesMTM(node, edgeIn.target());
-                        
+
                         if ( phase == PHASE_NODEORDER_INIT || phase == PHASE_NODEORDER_ELIMINATE )
                         {
                             searchSpace += _graph->lastEdge(edgeIn.target())-_graph->lastEdge(edgeIn.target());
@@ -2412,7 +2412,7 @@ namespace processing {
                             _possibleWitnesses[edgeOut.target()] = Weight::MAX_VALUE;
 
                             // If shortest path would have increased length, a shortcut edge may be necessary.
-                            // Since the search is limted, sometimes shortcuts are added, 
+                            // Since the search is limted, sometimes shortcuts are added,
                             // that are not necessary. But they do not invalidate the correctness.
                             if ( witnessWeight > (edgeIn.weight() + edgeOut.weight()))
                             {
@@ -2420,12 +2420,12 @@ namespace processing {
                             }
                         }
                     }
-                    
-                    if ( phase == PHASE_NODEORDER_INIT || phase == PHASE_NODEORDER_ELIMINATE )                    
+
+                    if ( phase == PHASE_NODEORDER_INIT || phase == PHASE_NODEORDER_ELIMINATE )
                     {
                         searchSpace += _linkedListMTM.size();
                     }
-                    
+
                     // cleanup the used mtm data structures
                     clearMTM(node, firstEdge, lastEdge);
                 }
@@ -2436,7 +2436,7 @@ namespace processing {
                 // The current hop-limit is stored in _maxHops.
                 else if ( oneHopBackwardSearch && _maxHops > 0 )
                 {
-                    
+
                     // Prepare target-flags for the local search. The search is stopped
                     // if all targets are settled. These target flags need to be removed
                     // after the local searches.
@@ -2462,22 +2462,22 @@ namespace processing {
                             }
                         }
                     }
-    
-                        
+
+
                     // A local search starting at each node incident to an incoming edge
                     // is performed. The distances to the nodes incident to the outgoing edges
                     // are used to decide the necessity of shortcut edges.
                     for ( EdgeID eIn = firstEdge; eIn < lastEdge; eIn++ )
                     {
                         const Edge& edgeIn = _graph->edge(eIn);
-                        
+
                         // need a incoming edge
                         if ( !edgeIn.isDirected(1) ) continue;
-    
+
                         // This is the second stop criterion for the local search. We only want to find
                         // witness paths that are at most as long as the path via the currently processed node.
                         // If we exceed this distance, we can stop the search.
-                        // The maximum distance is the length of the incoming edge plus 
+                        // The maximum distance is the length of the incoming edge plus
                         // the maximum length of an outgoing edge minus the minimum incoming
                         // edge of the node incident to this outgoing edge.
                         // maxOutDist is this length without the length of the incoming edge.
@@ -2486,10 +2486,10 @@ namespace processing {
                         {
                             const Edge& edgeOut = _graph->edge(eOut);
                             if ( !edgeOut.isDirected(0) ) continue;
-                                
+
                             // A path to the start node is not necessary.
                             if ( edgeIn.target() == edgeOut.target() ) continue;
-                                
+
                             // one hop backward search
                             EdgeWeight minBackDist = Weight::MAX_VALUE;
                             EdgeID outFirstEdge = _graph->firstLevelEdge(edgeOut.target());
@@ -2500,17 +2500,17 @@ namespace processing {
                                 if ( !edge.isDirected(1) || edge.target() == node ) continue;
                                 if ( minBackDist > edge.weight() ) minBackDist = edge.weight();
                             }
-                            
-                            // Special case: the node incident to the outgoing edge has no ingoing edges 
+
+                            // Special case: the node incident to the outgoing edge has no ingoing edges
                             // except for the one from "node". Look out for problems converting unsigned int to int.
                             if (minBackDist < Weight::MAX_VALUE)
                             {
                                 if ( maxOutDist < ((int)edgeOut.weight() - (int)minBackDist)) maxOutDist = ((int)edgeOut.weight() - (int)minBackDist);
                             }
                         }
-                        
+
                         // maximum number of settled nodes during local search, 0 = infinite.
-                        // This limit can differ between weight calculation (simulateOnly=true) 
+                        // This limit can differ between weight calculation (simulateOnly=true)
                         // and actual contraction.
                         unsigned int maxSettled;
                         if ( phase == PHASE_NODEORDER_INIT || phase == PHASE_NODEORDER_ELIMINATE )
@@ -2523,14 +2523,14 @@ namespace processing {
                         }
                         else
                         {
-                            maxSettled = _contractParams.maxSettledElim;    
+                            maxSettled = _contractParams.maxSettledElim;
                         }
-                        
+
                         // Hop-limit, decrease the hop-limit by 1 since an additional
                         // 1-hop backward search is performed.
                         unsigned int maxHops = _maxHops;
                         if (maxHops > 0) maxHops--;
-                        
+
                         // *** Perform local search. ***
                         // Only perform local search if there is hope to find a witness.
                         // This check is necessary since maxOutDist may be negative.
@@ -2544,22 +2544,22 @@ namespace processing {
                                 noOfTargets,
                                 maxSettled /* max settled nodes 0 == inf */,
                                 maxHops);
-                                
+
                             if ( phase == PHASE_NODEORDER_INIT || phase == PHASE_NODEORDER_ELIMINATE )
                             {
                                 // add up search space sizes of the local searches for weight calculation
                                 searchSpace += _localDijkstra.noOfSettledNodes();
                             }
                         }
-                        
-                        
+
+
                         // Local edge reduction uses the results of the local search to remove
                         // edges that are not on any shortest path.
                         if (_localReduceEdges && (phase == PHASE_NODEORDER_ELIMINATE || phase == PHASE_CONSTRUCT) && !simulateOnly)
                         {
                             reduceEdgesLocal( node, edgeIn );
                         }
-                        
+
                         // We finished the local search from start node v = edgeIn.target(). Now we
                         // want to find witness paths to each node w incident to an outgoing edge (node,w)
                         // Either the local search settled w or we perform a 1-hop backward search from w.
@@ -2572,17 +2572,17 @@ namespace processing {
                             if ( edgeIn.target() == edgeOut.target() ) continue;
 
                             bool foundWitness = false;
-                            
-                            // First check if the local search reached edgeOut.target() with a 
+
+                            // First check if the local search reached edgeOut.target() with a
                             // _maxHops - 1 witness path. If there is no such witness, do there
                             // 1-hop backward search.
-                            if ( !_localDijkstra.isSettled(0, edgeOut.target()) 
+                            if ( !_localDijkstra.isSettled(0, edgeOut.target())
                                 || _localDijkstra.distanceTo(edgeOut.target(), 0) > (edgeIn.weight() + edgeOut.weight())
                                 || _localDijkstra.parentOf(edgeOut.target(), 0) == node)
-                                
+
                             {
                                 // Scan through the edges (x,w) incoming to the node w incident to the outgoing edge
-                                // (node,w). (w = edgeOut.target()) to perform a 1-hop backward search. 
+                                // (node,w). (w = edgeOut.target()) to perform a 1-hop backward search.
                                 // Then we check if x is settled by the local search with to find additional
                                 // witness paths.
                                 EdgeID outFirstEdge = _graph->firstLevelEdge(edgeOut.target());
@@ -2591,8 +2591,8 @@ namespace processing {
                                 {
                                     const Edge& edge = _graph->edge(e);
                                     if ( !edge.isDirected(1) || edge.target() == node ) continue;
-                                        
-                                    if (_localDijkstra.isSettled(0, edge.target()) 
+
+                                    if (_localDijkstra.isSettled(0, edge.target())
                                         && _localDijkstra.distanceTo(edge.target(), 0) + edge.weight() <= (edgeIn.weight() + edgeOut.weight())
                                         && _localDijkstra.parentOf(edge.target(), 0) != node)
                                     {
@@ -2605,27 +2605,27 @@ namespace processing {
                             {
                                 foundWitness = true;
                             }
-    
-                            
+
+
                             // If shortest path would have increased length, a shortcut edge may be necessary.
-                            // Since the search is limted, sometimes shortcuts are added, 
+                            // Since the search is limted, sometimes shortcuts are added,
                             // that are not necessary. But they do not invalidate the correctness.
                             if ( !foundWitness )
                             {
                                 prepareNewShortcutEdge( node, firstEdge, lastEdge, eIn, edgeIn, eOut, edgeOut );
                             }
-                        }    
+                        }
                         _localDijkstra.clear();
-                        
+
                     }
-                    
+
                     // Remove target-flags that are previously set since these are
                     // stored in the global graph datastructure.
                     for ( EdgeID eOut = firstEdge; eOut < lastEdge; eOut++ )
                     {
                         const Edge& edgeOut = _graph->edge(eOut);
                         if ( !edgeOut.isDirected(0) ) continue;
-                            
+
                         // one hop backward search
                         EdgeID outFirstEdge = _graph->firstLevelEdge(edgeOut.target());
                         EdgeID outLastEdge = _graph->lastEdge(edgeOut.target());
@@ -2639,12 +2639,12 @@ namespace processing {
                                 noOfTargets--;
                             }
                         }
-                        
+
                     }
-                    
+
                     // In case of edge reduction, it is possible that an edge (v,w) has been removed
                     // with (v,node) an incoming edge and (node,w) an outgoing edge. Because of the
-                    // 1-hop backward search from node w, the node v becomes a target. So it is 
+                    // 1-hop backward search from node w, the node v becomes a target. So it is
                     // necessary to check nodes incident to ingoing edges for target flags, too.
                     if (_localReduceEdges && (phase == PHASE_NODEORDER_ELIMINATE || phase == PHASE_CONSTRUCT) && !simulateOnly)
                     {
@@ -2661,7 +2661,7 @@ namespace processing {
                     }
                     assert( noOfTargets == 0 );
                 }
-                
+
                 // simple local search with dijkstra
                 // ---------------------------------
                 // This is the basic local search without any speedups.
@@ -2682,8 +2682,8 @@ namespace processing {
                             noOfTargets++;
                         }
                     }
-    
-                        
+
+
                     // A local search starting at each node incident to an incoming edge
                     // is performed. The distances to the nodes incident to the outgoing edges
                     // are used to decide the necessity of shortcut edges.
@@ -2691,11 +2691,11 @@ namespace processing {
                     {
                         const Edge& edgeIn = _graph->edge(eIn);
                         if ( !edgeIn.isDirected(1) ) continue;
-    
+
                         // This is the second stop criterion for the local search. We only want to find
                         // witness paths that are at most as long as the path via the currently processed node.
                         // If we exceed this distance, we can stop the search.
-                        // The maximum distance is the length of the incoming edge plus 
+                        // The maximum distance is the length of the incoming edge plus
                         // the maximum length of an outgoing edge.
                         // maxOutDist is this length without the length of the incoming edge.
                         EdgeWeight maxOutDist = 0;
@@ -2703,20 +2703,20 @@ namespace processing {
                         {
                             const Edge& edgeOut = _graph->edge(eOut);
                             if ( !edgeOut.isDirected(0) ) continue;
-                                
+
                             // A path to the start node is not necessary.
                             if ( edgeIn.target() == edgeOut.target() ) continue;
-                                
+
                             if (maxOutDist < edgeOut.weight()) maxOutDist = edgeOut.weight();
                         }
-                        
+
                         // We assume that each edge has positive weight. If maxOutDist == 0,
                         // then there exists no outgoing edge (or only one leading to the
                         // start node), we do not need a local search and also no shortcuts.
                         if (maxOutDist == 0) continue;
-                            
+
                         // maximum number of settled nodes during local search, 0 = infinite.
-                        // This limit can differ between weight calculation (simulateOnly=true) 
+                        // This limit can differ between weight calculation (simulateOnly=true)
                         // and actual contraction.
                         unsigned int maxSettled;
                         if ( phase == PHASE_NODEORDER_INIT || phase == PHASE_NODEORDER_ELIMINATE )
@@ -2729,9 +2729,9 @@ namespace processing {
                         }
                         else
                         {
-                            maxSettled = _contractParams.maxSettledElim;    
+                            maxSettled = _contractParams.maxSettledElim;
                         }
-                        
+
                         // *** Perform local search. ***
                         _localDijkstra.searchWithoutTarget(
                             edgeIn.target(),
@@ -2741,24 +2741,24 @@ namespace processing {
                             noOfTargets,
                             maxSettled /* max settled nodes 0 == inf */,
                             _maxHops);
-                            
+
                         if ( phase == PHASE_NODEORDER_INIT || phase == PHASE_NODEORDER_ELIMINATE )
                         {
                             searchSpace += _localDijkstra.noOfSettledNodes();
                         }
-                        
+
                         // Local edge reduction uses the results of the local search to remove
                         // edges that are not on any shortest path.
                         if (_localReduceEdges && (phase == PHASE_NODEORDER_ELIMINATE || phase == PHASE_CONSTRUCT) && !simulateOnly)
                         {
-                            reduceEdgesLocal( node, edgeIn );  
+                            reduceEdgesLocal( node, edgeIn );
                         }
-                        
+
                         // The local search starting at v ( = edgeIn.target() ) is finished.
                         // Now we check for each node w incident to an outging edge (node,w) ( = edgeOut )
                         // if the path <v,node,w> is shorter than the shortest path distance v -> w ignoring
                         // node. If so, a shortcut edge is necessary to save shortest paths distances.
-                        // Since the local search may be limited, sometimes shortcuts are added, 
+                        // Since the local search may be limited, sometimes shortcuts are added,
                         // that are not necessary. But they do not invalidate the correctness.
                         for ( EdgeID eOut = firstEdge; eOut < lastEdge; eOut++ )
                         {
@@ -2767,16 +2767,16 @@ namespace processing {
 
                             // no self loops
                             if ( edgeIn.target() == edgeOut.target() ) continue;
-    
+
                             // Compare length of path <v,node,w> to distance between v -> w ignoring node.
-                            if ( !_localDijkstra.isSettled(0, edgeOut.target()) 
+                            if ( !_localDijkstra.isSettled(0, edgeOut.target())
                                 || _localDijkstra.distanceTo(edgeOut.target(), 0) > (edgeIn.weight() + edgeOut.weight())
                                 || _localDijkstra.parentOf(edgeOut.target(), 0) == node)
                             {
-                                
+
                                 prepareNewShortcutEdge( node, firstEdge, lastEdge, eIn, edgeIn, eOut, edgeOut );
                             }
-                            
+
                             // If a witness exists, we may want to store the witness to use This
                             // information in a later hieararchy construction.
                             else
@@ -2786,11 +2786,11 @@ namespace processing {
                                     storeWitness( node, edgeIn, edgeOut );
                                 }
                             }
-                        }    
+                        }
                         _localDijkstra.clear();
-                        
+
                     }
-                    
+
                     // Remove previously added target flags from the global graph datastructure.
                     // If we do not, they manipulate subsequent local searches.
                     for ( EdgeID eOut = firstEdge; eOut < lastEdge; eOut++ )
@@ -2800,9 +2800,9 @@ namespace processing {
                         _graph->node(edgeOut.target()).setTarget(false);
                     }
                 }
-                
+
             }
-            
+
             VERBOSE_CONTRACT( cout << " search space " << searchSpace << flush; )
             VERBOSE_CONTRACT( cout << " old " << 2*(lastEdge-firstEdge) << flush; )
             VERBOSE_CONTRACT( cout << " new " << 2*_newEdges.size() << flush; )
@@ -2829,21 +2829,21 @@ namespace processing {
                 else
                 {
                     diff = _graph->addShortcutEdge(iter->source, iter->edge);
-                    
+
                     // Output of shortcut edges that can be used in a later hierarchy construction.
                     if ( phase == PHASE_NODEORDER_ELIMINATE && saveShortcutsWitnesses)
                     {
                         _storeShortcuts.addShortcut(node, iter->source, iter->edge.target(), iter->edge.isBidirected());
                     }
                 }
-                
+
                 edgeDiff += diff;
 
                 if ( phase == PHASE_NODEORDER_INIT || phase == PHASE_NODEORDER_ELIMINATE )
                 {
                     // Used for weight calculation.
                     newEdgesCounter += diff;
-                    
+
                     // Priority term: Count sum of original edges the new shortcuts represent.
                     // Count bidirectional edges twice.
                     shortcutOriginalEdgeSumTemp += iter->edge.shortcutOriginalEdgeCount();
@@ -2856,12 +2856,12 @@ namespace processing {
                     _shortcutsText << " " << iter->source << " " << iter->edge.target() << " " << iter->edge.weight();
                     if (iter->edge.isBidirected()) _shortcutsText << " " << iter->edge.target() << " " << iter->source << " " << iter->edge.weight();
                 }
-                
+
             }
-            
+
             // Clear buffer of new edges.
             _newEdges.clear();
-            
+
 
             // Update new level of contracted node. In case of node ordering Also
             // update attributes and neighbors.
@@ -2870,10 +2870,10 @@ namespace processing {
                 // before updating neighbors set current node into right level
                 _graph->node(node).setLevel(_currentLevel);
                 _graph->changeNodeLevelOnlyReverseEdges(node);
-                
+
                 _noOfEdges += edgeDiff;
                 _noOfNodes--;
-                
+
                 if ( phase == PHASE_NODEORDER_ELIMINATE )
                 {
                     pqData(node).level = _currentLevel;
@@ -2895,10 +2895,10 @@ namespace processing {
                 if ( edgeDiffResult    != NULL ) *edgeDiffResult    = edgeDiff;
                 if ( newEdgesResult    != NULL ) *newEdgesResult    = newEdgesCounter;
             }
-            
+
         }
-        
-        /** 
+
+        /**
          * Distribute the Voronoi region R(node) of the current node among the neighboring voronoi regions.
          * This is done using a modified Dijkstra algorithm:
          *   Init: For each node x in R(node), that has an incoming edge (y,x) with
@@ -2919,7 +2919,7 @@ namespace processing {
             while ( current != SPECIAL_NODEID )
             {
                 VERBOSE_CONTRACT_VORONOI( cout << "current " << current << endl; )
-                
+
                 // Under all nodes that are incident to an incoming node of the currently
                 // regarded node in R(node), and that are not in R(node), take the node
                 // that is on the shortest path from its owner to the currently regarded node.
@@ -2946,7 +2946,7 @@ namespace processing {
                         minDistNode = edge.target();
                     }
                 }
-                // Special case: It is possibly, that no neighboring Voronoi region exists that can reach 
+                // Special case: It is possibly, that no neighboring Voronoi region exists that can reach
                 // the currently regarded node. In this case, the node is ignored.
                 if ( minDistNode != SPECIAL_NODEID )
                 {
@@ -2955,7 +2955,7 @@ namespace processing {
                 }
                 current = pqData(current).voronoiNextBorderNode;
             }
-            
+
             NodeID v;
             EdgeWeight dist;
             NodeID parent;
@@ -2970,14 +2970,14 @@ namespace processing {
                 data.voronoiOwner = pqData(parent).voronoiOwner;
                 data.voronoiNumber = dist;
                 PQueueNodeElimination& dataOwner = pqData(data.voronoiOwner);
-                
+
                 VERBOSE_CONTRACT_VORONOI( cout << "node " << v << " dist " << dist << " parent " << parent << " new owner " << data.voronoiOwner << endl; )
 
                 assert( !dataOwner.isEliminated() );
-               
+
                 // Update stats of voronoi owner
                 dataOwner.voronoiNumber++;
-                
+
                 // Add v to linked list of voronoi Region of new owner.
                 data.voronoiNextBorderNode = dataOwner.voronoiNextBorderNode;
                 dataOwner.voronoiNextBorderNode = v;
@@ -2992,14 +2992,14 @@ namespace processing {
                     _dVoronoi.updateNode( edge.target(), newDist, v );
                 }
             }
-            _dVoronoi.clear();            
+            _dVoronoi.clear();
         }
 
         // ***
         // Methods for storing witness paths and shortcut edges.
         // ***
 
-    	/** 
+    	/**
     	 * Adds listes shortcut edges, works even if original graph has changed edge weights
     	 * or bidir edges split to unidir edges. But does not work if the edges a shortcut
     	 * represent are not there.
@@ -3033,7 +3033,7 @@ namespace processing {
             	                        {
             	                            _noOfEdges += _graph->addShortcutEdge(in, Edge(out, edgeIn.weight()+edgeOut.weight(), EDGE_TYPE_SHORTCUT, true, bidir, node));
             	                        }
-            	                        
+
             	                        // shortcut was bidirected but inEdge and outEdge are not both bidirected
             	                        // try to find edges for shortcut in opposite direction
             	                        else
@@ -3045,7 +3045,7 @@ namespace processing {
             	                            if (edgeIn.isBidirected())
             	                            {
             	                                bIn2 = true;
-            	                                weight2 += edgeIn.weight();    
+            	                                weight2 += edgeIn.weight();
             	                            }
             	                            else
             	                            {
@@ -3064,7 +3064,7 @@ namespace processing {
     	                                            cerr << "Did not find an in edge: " << in << " <- " << node << endl;
     	                                        }
     	                                    }
-    	                                    
+
     	                                    if (edgeOut.isBidirected())
     	                                    {
     	                                        bOut2 = true;
@@ -3087,7 +3087,7 @@ namespace processing {
     	                                            cerr << "Did not find an out edge: " << node << " <- " << out << endl;
     	                                        }
     	                                    }
-    
+
                                             // if weight for both directions is the same, add bidir edge
                                             if (bIn2 && bOut2 && weight == weight2)
                                             {
@@ -3097,14 +3097,14 @@ namespace processing {
         	                                else
         	                                {
         	                                    _noOfEdges += _graph->addShortcutEdge(in, Edge(out, weight, EDGE_TYPE_SHORTCUT, true, false, node));
-        	                                    
+
         	                                    // only add second shortcut if all edges have been found
         	                                    if (bIn2 && bOut2)
         	                                    {
         	                                        _noOfEdges += _graph->addShortcutEdge(out, Edge(in, weight2, EDGE_TYPE_SHORTCUT, true, false, node));
         	                                    }
         	                                }
-            	                        }   
+            	                        }
                 	                    bOut = true;
                 	                    break;
             	                    }
@@ -3123,9 +3123,9 @@ namespace processing {
     	                cout << "Did not find an in edge: " << in << " -> " << node << endl;
     	            }
                 }
-            }   
+            }
     	}
-    	
+
     	/**
     	 * Calculates weight of witnesses and adds witness shortcuts
     	 * works even if original graph has changed edge weights.
@@ -3159,7 +3159,7 @@ namespace processing {
         	            current = next;
         	        }
     	        }
-    	        
+
     	        if ( bNext )
     	        {
         	        // find edge to in
@@ -3176,22 +3176,22 @@ namespace processing {
     	                }
     	            }
                 }
-                
+
                 // only add shortcut edge if all nodes of the path have been found
                 if ( bNext )
                 {
-    	            // add a shortcut edge for this witness marked as shortcut 
+    	            // add a shortcut edge for this witness marked as shortcut
     	            // attention: edge.isShortcut() means edge is a witness-shortcut
     	            _noOfEdges += _graph->addShortcutEdge(in, Edge(out, weight, EDGE_TYPE_WITNESS_SHORTCUT, true, false));
     	            //_graph->addEdge(in, Edge(out, weight, true, true, false));
     	            //_graph->addEdge(out, Edge(in, weight, true, false, true));
     	        }
-    	        
+
     	        if ( !bNext )
     	        {
     	            cout << "missing edges for witness" << endl;
     	        }
-    	        
+
     	    }
     	}
 
@@ -3200,8 +3200,8 @@ namespace processing {
     	    EdgeID firstEdge = _graph->firstLevelEdge(node);
     	    EdgeID lastEdge = _graph->lastEdge(node);
     	    bool bInitBucketsMTM = false;
-    	    
-    	    
+
+
     	    // sort (OPEN QUESTION: does this always help)
     	    if (firstEdge < lastEdge)
     	    {
@@ -3212,17 +3212,17 @@ namespace processing {
                 {
                     const Edge& edgeIn = _graph->edge(eIn);
                     if ( !edgeIn.isDirected(1) || edgeIn.isShortcut() ) continue;
-                        
+
                     EdgeID inFirstEdge = _graph->firstLevelEdge(edgeIn.target());
                     EdgeID inLastEdge = _graph->lastEdge(edgeIn.target());
-                    
+
                     bool bFindPossibleWitnessesMTM = false;
-                        
+
                     for ( EdgeID eOut = firstEdge; eOut < lastEdge; eOut++ )
                     {
                         const Edge& edgeOut = _graph->edge(eOut);
                         if ( edgeIn.target() == edgeOut.target() || !edgeOut.isDirected(0) || edgeOut.isShortcut() ) continue;
-                        
+
                         bool bValid = false;
                         for ( EdgeID e = inFirstEdge; e < inLastEdge; e++ )
                         {
@@ -3237,7 +3237,7 @@ namespace processing {
                                 //break;
                             }
                         }
-                        
+
                         // if there is no valid shortcut, create one
                         if ( !bValid )
                         {
@@ -3249,10 +3249,10 @@ namespace processing {
                             }
                             if ( !bFindPossibleWitnessesMTM )
                             {
-                                findPossibleWitnessesMTM(node, edgeIn.target());                            
+                                findPossibleWitnessesMTM(node, edgeIn.target());
                                 bFindPossibleWitnessesMTM = true;
                             }
-                            
+
                             // if no two-hop witnesses exists, add shortcut
                             if (_possibleWitnesses[edgeOut.target()] > (edgeIn.weight() + edgeOut.weight()))
                             {
@@ -3261,7 +3261,7 @@ namespace processing {
                             }
                         }
                     }
-                    
+
                     // clear _possibleWitnesses array
                     if ( bFindPossibleWitnessesMTM )
                     {
@@ -3269,16 +3269,16 @@ namespace processing {
                         {
                             const Edge& edgeOut = _graph->edge(eOut);
                             if ( !edgeOut.isDirected(0) ) continue;
-                                
+
                             // no self loops
                             if ( edgeIn.target() == edgeOut.target() ) continue;
-        
+
                             _possibleWitnesses[edgeOut.target()] = Weight::MAX_VALUE;
                         }
                     }
-                    
+
                 }
-                
+
                 if ( bInitBucketsMTM )
                 {
                     // cleanup
@@ -3300,7 +3300,7 @@ namespace processing {
     	    EdgeID firstEdge = _graph->firstLevelEdge(node);
     	    EdgeID lastEdge = _graph->lastEdge(node);
     	    bool bInitBucketsMTM = false;
-    	    
+
     	    if (firstEdge < lastEdge)
     	    {
     	        // sort (OPEN QUESTION: does this always help)
@@ -3310,12 +3310,12 @@ namespace processing {
                 {
                     const Edge& edgeIn = _graph->edge(eIn);
                     if ( !edgeIn.isDirected(1) || edgeIn.isShortcut() ) continue;
-                        
+
                     EdgeID inFirstEdge = _graph->firstLevelEdge(edgeIn.target());
                     EdgeID inLastEdge = _graph->lastEdge(edgeIn.target());
-                    
+
                     bool bFindPossibleWitnessesMTM = false;
-                        
+
                     for ( EdgeID eOut = firstEdge; eOut < lastEdge; eOut++ )
                     {
                         const Edge& edgeOut = _graph->edge(eOut);
@@ -3331,7 +3331,7 @@ namespace processing {
                             if ( wNode == node && wIn == edgeIn.target() && wOut == edgeOut.target() )
                             {
                                 r.read(); // no peek
-                                
+
                                 NodeID wCurrent = wOut;
                                 NodeID wNext;
                                 EdgeWeight wWeight = 0;
@@ -3357,7 +3357,7 @@ namespace processing {
                                 }
 
                                 if ( bNext )
-                                {                                
+                                {
                                     // find edge to in
                                     EdgeID wLastEdge = _graph->lastEdge(wCurrent);
                                     bNext = false;
@@ -3372,7 +3372,7 @@ namespace processing {
                                         }
                                     }
                                 }
-                                
+
                                 // if witness is short enough, no shortcut necessary
                                 if ( bNext && (wWeight <= (edgeIn.weight() + edgeOut.weight())) )
                                 {
@@ -3380,7 +3380,7 @@ namespace processing {
                                 }
                             }
                         }
-                        
+
                         // if a shortcut is necessary, do a one hop search
                         if ( shortcutNecessary )
                         {
@@ -3398,7 +3398,7 @@ namespace processing {
                                 }
                             }
                         }
-                        
+
                         // if there is no valid shortcut, create one
                         if ( shortcutNecessary )
                         {
@@ -3410,10 +3410,10 @@ namespace processing {
                             }
                             if ( !bFindPossibleWitnessesMTM )
                             {
-                                findPossibleWitnessesMTM(node, edgeIn.target());                            
+                                findPossibleWitnessesMTM(node, edgeIn.target());
                                 bFindPossibleWitnessesMTM = true;
                             }
-                            
+
                             // if no two-hop witnesses exists, add shortcut
                             if (_possibleWitnesses[edgeOut.target()] > (edgeIn.weight() + edgeOut.weight()))
                             {
@@ -3421,7 +3421,7 @@ namespace processing {
                             }
                         }
                     }
-                    
+
                     // clear _possibleWitnesses array
                     if ( bFindPossibleWitnessesMTM )
                     {
@@ -3429,22 +3429,22 @@ namespace processing {
                         {
                             const Edge& edgeOut = _graph->edge(eOut);
                             if ( !edgeOut.isDirected(0) ) continue;
-                                
+
                             // no self loops
                             if ( edgeIn.target() == edgeOut.target() ) continue;
-        
+
                             _possibleWitnesses[edgeOut.target()] = Weight::MAX_VALUE;
                         }
                     }
-                    
+
                 }
-                
+
                 if ( bInitBucketsMTM )
                 {
                     // cleanup
                     clearMTM(node, firstEdge, lastEdge);
                 }
-                
+
                 _noOfEdges -= 2*(lastEdge - firstEdge);
                 for ( typename vector<NewEdge>::const_iterator iter = _newEdges.begin(); iter != _newEdges.end(); iter++ )
                 {
@@ -3455,7 +3455,7 @@ namespace processing {
         	_noOfNodes--;
         }
 
-        /** 
+        /**
          * Debugging routines: check whetere shortest paths are preserved during contraction.
          * These are time consuming and should only be used for debugging and on small graphs.
          * And they also contain some custom code like special node ids where errors occured.
@@ -3472,7 +3472,7 @@ namespace processing {
 
             VERBOSE_CONTRACT( cout << "initTestShortestPaths" << endl; )
             _testPaths.resize(_testRuns.size(), Weight::MAX_VALUE);
-            
+
             for (NodeID x = 0; x < _testRuns.size(); x++) {
                 _testDijkstra.bidirSearch(_testRuns[x].first, _testRuns[x].second);
                 _testDijkstra.pathTo(_testPaths[x],_testRuns[x].second,-1);
@@ -3481,7 +3481,7 @@ namespace processing {
             }
         }
 
-        /** 
+        /**
          * Debugging routines: check whetere shortest paths are preserved during contraction.
          * These are time consuming and should only be used for debugging and on small graphs.
          * And they also contain some custom code like special node ids where errors occured.
@@ -3495,7 +3495,7 @@ namespace processing {
                 _testDijkstra.pathTo(postPath,_testRuns[x].second,-1);
                 _testDijkstra.clear();
                 Path& prePath = _testPaths[x];
-                
+
                 if (prePath.length() != postPath.length())
                 {
                     cerr << "source " << _testRuns[x].first << " level " << _graph->node(_testRuns[x].first).level() << " target " << _testRuns[x].second << " level " << _graph->node(_testRuns[x].second).level() << " dist pre " << prePath.length() << " post " << postPath.length() << endl;

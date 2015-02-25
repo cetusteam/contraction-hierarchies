@@ -39,7 +39,7 @@ namespace command {
         int main(int argc, char *argv[]) {
 
             string sgrFile("");
-            
+
             int opt2 = -1;
             while ((opt2 = getopt(argc, argv, "z:")) != -1)
             {
@@ -48,11 +48,11 @@ namespace command {
                     case 'z':
                         sgrFile = string(optarg);
                         break;
-                        
+
                 }
             }
 
-            stringstream ssName; 
+            stringstream ssName;
             ssName << sgrFile;
 
             datastr::graph::SearchGraph* searchGraph;
@@ -85,12 +85,12 @@ namespace command {
 
             VERBOSE( Percent percent( searchGraph->noOfNodes() ) );
             double time = timestamp();
-            
+
             for ( NodeID u = 0; u < searchGraph->noOfNodes(); u++ )
             {
                 dijkstra.bidirSearch(u, SPECIAL_NODEID);
                 const vector<NodeID>& settledNodes = dijkstra.settledNodes( 0 );
-                
+
                 for ( NodeID i = settledNodes.size()-1; ; i-- )
                 {
                     NodeID v = settledNodes[i];
@@ -108,10 +108,10 @@ namespace command {
                 {
                     flag[settledNodes[i]] = false;
                 }
-                
+
                 fill( accessNodesCurrent.begin(), accessNodesCurrent.end(), 0);
                 fill( settledNodesCurrent.begin(), settledNodesCurrent.end(), 0);
-                
+
                 for ( NodeID i = 0; i < settledNodes.size(); i++ )
                 {
                     NodeID v = settledNodes[i];
@@ -119,7 +119,7 @@ namespace command {
                     assert( index > 0 );
                     if ( dijkstra.pqData( 0, index ).stalled() ) continue;
                     NodeID w = dijkstra.parentOf( v, 0 );
-                    
+
                     T = searchGraph->noOfNodes();
                     T >>= 1;
                     x = 0;
@@ -133,23 +133,23 @@ namespace command {
                         }
                         else if ( v < border )
                         {
-                            settledNodesCurrent[x] = i;   
+                            settledNodesCurrent[x] = i;
                         }
                         x++;
                         T >>= 1;
                     }
-                    
+
                 }
 
                 for ( x = 0; x < accessNodesCurrent.size(); x++ )
                 {
                     if ( accessNodesCurrent[x] > accessNodesMax[x] ) accessNodesMax[x] = accessNodesCurrent[x];
                     accessNodesSum[x] += accessNodesCurrent[x];
-                    
+
                     if ( settledNodesCurrent[x] > settledNodesMax[x] ) settledNodesMax[x] = settledNodesCurrent[x];
                     settledNodesSum[x] += settledNodesCurrent[x];
                 }
-            
+
                 dijkstra.clear();
                 VERBOSE( percent.printStatus(u) );
             }
@@ -161,7 +161,7 @@ namespace command {
                 sum[i] += sum[i+1];
                 if (i == 0) break;
             }
-                
+
             ofstream log((ssName.str()+".tnr.access-nodes-1").c_str());
             if (!log.is_open()) { cerr << "Cannot write to " << (ssName.str()+".tnr.access-nodes-1") << endl; exit(1); }
             for ( NodeID u = 0; u < sum.size(); u++ )
@@ -169,12 +169,12 @@ namespace command {
                 log << sum[u] << endl;
             }
             log.close();
-            
+
             log.open((ssName.str()+".tnr.access-nodes-sum").c_str());
             if (!log.is_open()) { cerr << "Cannot write to " << (ssName.str()+".tnr.access-nodes-sum") << endl; exit(1); }
             for ( x = 0; x < accessNodesCurrent.size(); x++ )
             {
-                log << accessNodesSum[x] << endl;            
+                log << accessNodesSum[x] << endl;
             }
             log.close();
 
@@ -182,16 +182,16 @@ namespace command {
             if (!log.is_open()) { cerr << "Cannot write to " << (ssName.str()+".tnr.access-nodes-max") << endl; exit(1); }
             for ( x = 0; x < accessNodesCurrent.size(); x++ )
             {
-                log << accessNodesMax[x] << endl;            
+                log << accessNodesMax[x] << endl;
             }
             log.close();
-            
+
 
             log.open((ssName.str()+".tnr.settled-nodes-sum").c_str());
             if (!log.is_open()) { cerr << "Cannot write to " << (ssName.str()+".tnr.settled-nodes-sum") << endl; exit(1); }
             for ( x = 0; x < settledNodesCurrent.size(); x++ )
             {
-                log << settledNodesSum[x] << endl;            
+                log << settledNodesSum[x] << endl;
             }
             log.close();
 
@@ -199,7 +199,7 @@ namespace command {
             if (!log.is_open()) { cerr << "Cannot write to " << (ssName.str()+".tnr.settled-nodes-max") << endl; exit(1); }
             for ( x = 0; x < settledNodesCurrent.size(); x++ )
             {
-                log << settledNodesMax[x] << endl;            
+                log << settledNodesMax[x] << endl;
             }
             log.close();
 
@@ -208,7 +208,7 @@ namespace command {
             return 0;
 
         }
-        
+
     };
 }
 #endif // _COMMAND_TNR_H

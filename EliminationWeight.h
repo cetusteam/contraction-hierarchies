@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007, 2008 
+/* Copyright (C) 2005, 2006, 2007, 2008
  * Robert Geisberger, Dominik Schultes, Peter Sanders,
  * Universitaet Karlsruhe (TH)
  *
@@ -25,7 +25,7 @@
 #include <limits>
 
 /**
- * Encapsulates several special values of the elimination weights or 
+ * Encapsulates several special values of the elimination weights or
  * priority terms for the node ordering. This class is required by the
  * BinaryHeap priority queue.
  * Here: elimination weight type = double
@@ -34,14 +34,14 @@ class EliminationWeight
 {
 public:
     typedef double Type;
-    
+
     /**
      * max value of an edge weight (due to the chosen type)
      * (used to represent 'infinity')
      */
-    static const Type MAX_VALUE = __DBL_MAX__;
-    static const Type MIN_VALUE = -__DBL_MAX__;
-    
+    static const Type MAX_VALUE;
+    static const Type MIN_VALUE;
+
 };
 
 #endif // ELIMINATIONWEIGHT_H

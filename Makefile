@@ -1,7 +1,7 @@
 include compiler.make
 
 SRC = main.cpp
-DEP = $(SRC:%.cpp=%.d) 
+DEP = $(SRC:%.cpp=%.d)
 main: main.o
 	$(CXX) $(LINK) -o $@ $^ $(LIBS)
 

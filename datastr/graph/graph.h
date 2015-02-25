@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007, 2008 
+/* Copyright (C) 2005, 2006, 2007, 2008
  * Robert Geisberger, Dominik Schultes, Peter Sanders,
  * Universitaet Karlsruhe (TH)
  *
@@ -31,7 +31,7 @@
 
 using namespace std;
 
-/** 
+/**
  * Type of a node ID.
  * Also used for everything that is bounded by the number of nodes,
  * e.g. the number of components.
@@ -45,7 +45,7 @@ typedef unsigned int EdgeID;
 typedef pair<NodeID, NodeID> stPair;
 typedef vector<stPair> stPairs;
 
-/** 
+/**
  * Special node ID which is normally not used
  * so that it can be used as flag.
  */

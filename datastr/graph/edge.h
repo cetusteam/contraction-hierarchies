@@ -35,7 +35,7 @@ const static NodeID EDGE_TYPE_SHORTCUT = 1;
  */
 const static NodeID EDGE_TYPE_WITNESS_SHORTCUT = 2;
 
-/** 
+/**
  * Represents a weighted edge assuming the source node is known,
  * i.e. only the target node is stored.
  * Base class for both EdgeCHFast
@@ -52,7 +52,7 @@ class EdgeTemplate
         os << edge.target() << ", " << edge.weight() << ")";
         return os;
     }
-    
+
 public:
     /**
      * Returns true iff the given edge and this edge are equal with respect
@@ -63,8 +63,8 @@ public:
         return ((target() == e.target()) &&
                 (isDirected(0) == e.isDirected(0)) && (isDirected(1) == e.isDirected(1)));
     }
-    
-    /** 
+
+    /**
      * Compares two edges first by target, in case of equality by weight.
      * Returns false if both edges are identical.
      */
@@ -75,7 +75,7 @@ public:
 
     /** Mark (during construction) that this edge belongs to the highway network. */
     void setHighwayEdge() {setFlag(HWY);}
-    
+
     /** Reset the flag that this edge belongs to the highway network. */
     void unsetHighwayEdge() {unsetFlag(HWY);}
 
@@ -86,17 +86,17 @@ public:
 
     /** Returns true iff this edge is open in the given direction. */
     bool isDirected(int searchID) const {return (isFlag(direction(searchID)));}
-    
+
     /** Returns true iff this edge is open in both directions (two-way). */
     bool isBidirected() const {return (isDirected(0) && isDirected(1));}
 
     bool isClosed() const {return ( (!isDirected(0)) && (!isDirected(1)) );}
-    
+
     void makeTwoWay() {
         setFlag(direction(0));
         setFlag(direction(1));
     }
-    
+
     void makeOneWay(int searchID) {
         setFlag(direction(searchID));
         unsetFlag(direction(1-searchID));
@@ -145,7 +145,7 @@ public:
         readPrimitive(in, _target);
         readPrimitive(in, _weight);
     }
-    
+
 protected:
     // counting from LSB (1) to MSB (32):
     // bit 1 and 2
@@ -155,30 +155,30 @@ protected:
     }
     // bit 3
     static const NodeID HWY = 4;
-    
+
     bool isFlag(NodeID flag) const {return ((_target & flag) != 0);}
     void setFlag(NodeID flag) {_target |= flag;}
     void unsetFlag(NodeID flag) {_target &= (~flag);}
-    
-    void setTarget(const NodeID t) 
+
+    void setTarget(const NodeID t)
     {
-        _target = t << TARGET_SHIFT; 
+        _target = t << TARGET_SHIFT;
         // treat SPECIAL_NODEID for unused edges different
         assert( t == SPECIAL_NODEID || target() == t );
     }
-    
+
     /**
      * The target node.
      * In addition, some flags.
      */
     NodeID _target;
-    
+
     /** The edge weight. */
     EdgeWeight _weight;
 };
 
 
-/** 
+/**
  * Represents a weighted edge assuming the source node is known,
  * i.e. only the target node is stored.
  * Used for Contraction Hierachies.
@@ -202,9 +202,9 @@ public:
         assert( isClosed() );
         setShortcutOriginalEdgeCount(1);
     }
-    
-    /** 
-     * Constructor. 
+
+    /**
+     * Constructor.
      * @param target the target node
      * @param weight the weight
      * @param type edge type (see constants EDGE_TYPE_...)
@@ -216,13 +216,13 @@ public:
      * @param shortcutEdgeOriginalEdgeCount used for a priority term during CH node ordering
      */
     EdgeCHFast(NodeID target, EdgeWeight weight, NodeID type, bool forward, bool backward,
-        NodeID shortcutMiddle = SPECIAL_NODEID, EdgeID shortcutEdge1 = SPECIAL_NODEID, 
+        NodeID shortcutMiddle = SPECIAL_NODEID, EdgeID shortcutEdge1 = SPECIAL_NODEID,
         EdgeID shortcutEdge2 = SPECIAL_NODEID, EdgeID shortcutEdgeOriginalEdgeCount = 1) {
         setTarget(target);
         if (forward) setFlag(direction(0));
         if (backward) setFlag(direction(1));
         setType(type);
-        
+
         _weight = weight;
         setShortcutOriginalEdgeCount(shortcutEdgeOriginalEdgeCount);
     }
@@ -233,7 +233,7 @@ public:
         if (reverseEdge.isDirected(1)) setFlag(direction(0));
         if (reverseEdge.isDirected(0)) setFlag(direction(1));
         setType(reverseEdge.type());
-        
+
         _weight = reverseEdge.weight();
         copyShortcutInfo(reverseEdge, true);
     }
@@ -265,7 +265,7 @@ public:
                 (type() == e.type()));
     }
 
-    /** 
+    /**
      *  Methods required to unpack shortcuts. Not supported.
      *  EdgeCHExpand supports them (switch USE_CH_EXPAND on in config.h)
      */
@@ -276,14 +276,14 @@ public:
     void setShortcutEdge2(EdgeID e) { }
     NodeID shortcutEdge2() const { return shortcutEdgeLimit(); }
     NodeID shortcutEdgeLimit() const { return SPECIAL_NODEID; }
-    void copyShortcutInfo(const EdgeCHFast& e, bool reverse) 
+    void copyShortcutInfo(const EdgeCHFast& e, bool reverse)
     {
         #ifdef COUNT_SHORTCUT_ORIGINAL_EDGES
         _shortcutOriginalEdgeCount = e.shortcutOriginalEdgeCount();
         #endif
     }
 
-    /** 
+    /**
      * Counter for the number of original edges a shortcut represents.
      * Used as priority term during node ordering.
      * (switch COUNT_SHORTCUT_ORIGINAL_EDGES on in config.h)
@@ -291,7 +291,7 @@ public:
     void setShortcutOriginalEdgeCount(const EdgeID count)
     {
         #ifdef COUNT_SHORTCUT_ORIGINAL_EDGES
-        _shortcutOriginalEdgeCount = count;           
+        _shortcutOriginalEdgeCount = count;
         #endif
     }
     EdgeID shortcutOriginalEdgeCount() const
@@ -302,21 +302,21 @@ public:
         return SPECIAL_NODEID;
         #endif
     }
-    
+
 protected:
     // counting from LSB (1) to MSB (32):
     // 1,2: direction
     // 3,4: type
     //
     static const NodeID TYPE_SHIFT = 2;
-    
+
     #ifdef COUNT_SHORTCUT_ORIGINAL_EDGES
     EdgeID _shortcutOriginalEdgeCount;
     #endif
 };
 
 
-/** 
+/**
  * Represents a weighted edge assuming the source node is known,
  * i.e. only the target node is stored.
  * Used for Contraction Hierarchies.
@@ -332,8 +332,8 @@ public:
         : EdgeCHFast() {
         _shortcut = 0;
     }
-    
-    /** 
+
+    /**
      * Constructor.
      * @param target the target node
      * @param weight the weight
@@ -345,8 +345,8 @@ public:
      * @param shortcutEdge2 relative index into the edge array of the second edge of the path
      * @param shortcutEdgeOriginalEdgeCount used for a priority term during CH node ordering
      */
-    EdgeCHExpandFast(NodeID target, EdgeWeight weight, NodeID type, bool forward, bool backward, 
-        NodeID shortcutMiddle = SPECIAL_NODEID, EdgeID shortcutEdge1 = SPECIAL_NODEID, 
+    EdgeCHExpandFast(NodeID target, EdgeWeight weight, NodeID type, bool forward, bool backward,
+        NodeID shortcutMiddle = SPECIAL_NODEID, EdgeID shortcutEdge1 = SPECIAL_NODEID,
         EdgeID shortcutEdge2 = SPECIAL_NODEID, EdgeID shortcutOriginalEdgeCount = 1) :
         EdgeCHFast(target,weight,type,forward,backward) {
         setShortcutMiddle(shortcutMiddle);
@@ -366,7 +366,7 @@ public:
         _weight = (_weight & ~WEIGHT_MASK) | w;
         assert( w == weight() );
     }
-    
+
 
     // ***
     // To expand a path with a recursive unpacking routine,
@@ -376,14 +376,14 @@ public:
     // the shortcut represents.
     // ***
 
-    void setShortcutMiddle(NodeID middle) { 
+    void setShortcutMiddle(NodeID middle) {
         assert( middle == SPECIAL_NODEID || middle < (1 << (32-SHORTCUT_SHIFT)) );
-        _shortcut = (_shortcut & SHORTCUT_EDGE_LIMIT) | (middle << SHORTCUT_SHIFT); 
+        _shortcut = (_shortcut & SHORTCUT_EDGE_LIMIT) | (middle << SHORTCUT_SHIFT);
         assert( middle == SPECIAL_NODEID || shortcutMiddle() == middle );
     }
     NodeID shortcutMiddle() const { return _shortcut >> SHORTCUT_SHIFT; }
-    
-    void setShortcutEdge1(EdgeID shortcutEdge1) 
+
+    void setShortcutEdge1(EdgeID shortcutEdge1)
     {
         if (shortcutEdge1 < SHORTCUT_EDGE_LIMIT)
         {
@@ -398,8 +398,8 @@ public:
     }
     EdgeID shortcutEdge1() const { return _weight >> (32-SHORTCUT_SHIFT); }
 
-    void setShortcutEdge2(EdgeID shortcutEdge2) 
-    { 
+    void setShortcutEdge2(EdgeID shortcutEdge2)
+    {
         if (shortcutEdge2 < SHORTCUT_EDGE_LIMIT)
         {
             _shortcut = (_shortcut & ~SHORTCUT_EDGE_LIMIT) | shortcutEdge2;
@@ -412,11 +412,11 @@ public:
         }
     }
     EdgeID shortcutEdge2() const { return _shortcut & SHORTCUT_EDGE_LIMIT; }
-    
+
     EdgeID shortcutEdgeLimit() const { return SHORTCUT_EDGE_LIMIT; }
 
-    void copyShortcutInfo(const EdgeCHExpandFast& e, bool reverse) 
-    { 
+    void copyShortcutInfo(const EdgeCHExpandFast& e, bool reverse)
+    {
         setShortcutMiddle(e.shortcutMiddle());
         if ( true || !reverse )
         {
@@ -429,10 +429,10 @@ public:
             setShortcutEdge2(e.shortcutEdge1());
         }
         #ifdef COUNT_SHORTCUT_ORIGINAL_EDGES
-        _shortcutOriginalEdgeCount = e.shortcutOriginalEdgeCount();           
+        _shortcutOriginalEdgeCount = e.shortcutOriginalEdgeCount();
         #endif
     }
-    
+
     /** Serializes this edge to a given stream. */
     void serialize(ostream& out) const {
         // not tested
@@ -444,9 +444,9 @@ public:
         // not tested
         in.read((char*)this,sizeof(EdgeCHExpandFast)/sizeof(char));
     }
-    
-    
-    
+
+
+
 protected:
     EdgeID _shortcut;
     static const NodeID SHORTCUT_SHIFT = 6;
@@ -454,7 +454,7 @@ protected:
     static const NodeID WEIGHT_MASK = (1 << (32-SHORTCUT_SHIFT)) - 1;
 };
 
-/** 
+/**
  * Represents a weighted edge assuming the source node is known,
  * i.e. only the target node is stored.
  * Used for Contraction Hierachies.
@@ -485,8 +485,8 @@ public:
         setShortcutOriginalEdgeCount(1);
         assert( isClosed() );
     }
-    
-    /** 
+
+    /**
      * Constructor.
      * @param target the target node
      * @param weight the weight
@@ -498,8 +498,8 @@ public:
      * @param shortcutEdge2 Not used, see EdgeCHExpand.
      * @param shortcutEdgeOriginalEdgeCount used for a priority term during CH node ordering
      */
-    EdgeCH(NodeID target, EdgeWeight weight, NodeID type, bool forward, bool backward, 
-        NodeID shortcutMiddle = SPECIAL_NODEID, EdgeID shortcutEdge1 = SPECIAL_NODEID, 
+    EdgeCH(NodeID target, EdgeWeight weight, NodeID type, bool forward, bool backward,
+        NodeID shortcutMiddle = SPECIAL_NODEID, EdgeID shortcutEdge1 = SPECIAL_NODEID,
         EdgeID shortcutEdge2 = SPECIAL_NODEID, EdgeID shortcutEdgeOriginalEdgeCount = 1) {
         setTarget(target);
         _flags = 0;
@@ -508,7 +508,7 @@ public:
         setType(type);
         _weight = weight;
         setShortcutOriginalEdgeCount(shortcutEdgeOriginalEdgeCount);
-        
+
     }
 
     /** Constructs the reverse edge of the given edge. */
@@ -531,8 +531,8 @@ public:
         return ((target() == e.target()) &&
                 (isDirected(0) == e.isDirected(0)) && (isDirected(1) == e.isDirected(1)));
     }
-    
-    /** 
+
+    /**
      * Compares two edges first by target, in case of equality by weight.
      * Returns false if both edges are identical.
      */
@@ -546,20 +546,20 @@ public:
 
     /** Returns true iff this edge is open in the given direction. */
     bool isDirected(int searchID) const {return (isFlag(direction(searchID)));}
-    
+
     /** Returns true iff this edge is open in both directions (two-way). */
     bool isBidirected() const {return (isDirected(0) && isDirected(1));}
 
     bool isClosed() const {return ( (!isDirected(0)) && (!isDirected(1)) );}
-    
+
     bool isHighwayEdge() const { assert( false ); return false; }
     void setHighwayEdge() { assert(false);}
-    
+
     void makeTwoWay() {
         setFlag(direction(0));
         setFlag(direction(1));
     }
-    
+
     void makeOneWay(int searchID) {
         setFlag(direction(searchID));
         unsetFlag(direction(1-searchID));
@@ -614,11 +614,11 @@ public:
     }
 
     NodeID type() const {return _type;}
-    
+
     void setType(NodeID k) {
         _type = k;
     }
-    
+
     bool isShortcut() const { return type() != EDGE_TYPE_ORIGINAL; }
 
     bool isIdentical(const EdgeCH& e) const {
@@ -630,7 +630,7 @@ public:
                 (isDirected(0) == e.isDirected(1)) && (isDirected(1) == e.isDirected(0)) &&
                 (type() == e.type()));
     }
-    
+
     void setShortcutMiddle(NodeID middle) { }
     NodeID shortcutMiddle() const { return SPECIAL_NODEID; }
 
@@ -640,21 +640,21 @@ public:
     void setShortcutEdge2(EdgeID e) { }
     EdgeID shortcutEdge2() const { return SPECIAL_NODEID; }
     EdgeID shortcutEdgeLimit() const { return SPECIAL_NODEID; }
-    
+
     void copyShortcutInfo(const EdgeCH& e, bool reverse)
     {
         #ifdef COUNT_SHORTCUT_ORIGINAL_EDGES
-        _shortcutOriginalEdgeCount = e.shortcutOriginalEdgeCount();           
+        _shortcutOriginalEdgeCount = e.shortcutOriginalEdgeCount();
         #endif
     }
-    
+
     void setShortcutOriginalEdgeCount(const EdgeID count)
     {
         #ifdef COUNT_SHORTCUT_ORIGINAL_EDGES
-        _shortcutOriginalEdgeCount = count;           
+        _shortcutOriginalEdgeCount = count;
         #endif
     }
-    
+
     EdgeID shortcutOriginalEdgeCount() const
     {
         #ifdef COUNT_SHORTCUT_ORIGINAL_EDGES
@@ -663,7 +663,7 @@ public:
         return SPECIAL_NODEID;
         #endif
     }
-    
+
 protected:
     // The colon behind the variable denotes the number of bytes
     // the variable uses in the main memory.
@@ -683,20 +683,20 @@ protected:
         assert( (searchID >= 0) && (searchID < 2) );
         return searchID+1;
     }
-    
+
     bool isFlag(NodeID flag) const {return ((_flags & flag) != 0);}
     void setFlag(NodeID flag) {_flags |= flag;}
     void unsetFlag(NodeID flag) {_flags &= (~flag);}
-    
+
     void setTarget(const NodeID t) {
         _target = t;
         assert( t == SPECIAL_NODEID || _target == t );
     }
-        
+
 };
 
 
-/** 
+/**
  * Represents a weighted edge assuming the source node is known,
  * i.e. only the target node is stored.
  * Used for Contraction Hierarchies.
@@ -720,8 +720,8 @@ public:
         _shortcutEdge1 = 0;
         _shortcutEdge2 = 0;
     }
-    
-    /** 
+
+    /**
      * Constructor.
      * @param target the target node
      * @param weight the weight
@@ -733,8 +733,8 @@ public:
      * @param shortcutEdge2 relative index into the edge array of the second edge of the path
      * @param shortcutEdgeOriginalEdgeCount used for a priority term during CH node ordering
      */
-    EdgeCHExpand(NodeID target, EdgeWeight weight, NodeID type, bool forward, bool backward, 
-        NodeID shortcutMiddle = SPECIAL_NODEID, EdgeID shortcutEdge1 = SPECIAL_NODEID, 
+    EdgeCHExpand(NodeID target, EdgeWeight weight, NodeID type, bool forward, bool backward,
+        NodeID shortcutMiddle = SPECIAL_NODEID, EdgeID shortcutEdge1 = SPECIAL_NODEID,
         EdgeID shortcutEdge2 = SPECIAL_NODEID, EdgeID shortcutOriginalEdgeCount = 1) :
         EdgeCH(target,weight,type,forward,backward) {
         setShortcutMiddle(shortcutMiddle);
@@ -771,13 +771,13 @@ public:
     // the shortcut represents.
     // ***
 
-    void setShortcutMiddle(NodeID middle) { 
-        _shortcutMiddle = middle; 
+    void setShortcutMiddle(NodeID middle) {
+        _shortcutMiddle = middle;
         assert( middle == SPECIAL_NODEID || _shortcutMiddle == middle );
     }
     NodeID shortcutMiddle() const { return _shortcutMiddle; }
-    
-    void setShortcutEdge1(EdgeID shortcutEdge1) 
+
+    void setShortcutEdge1(EdgeID shortcutEdge1)
     {
         if (shortcutEdge1 < SHORTCUT_EDGE_LIMIT)
         {
@@ -790,8 +790,8 @@ public:
     }
     EdgeID shortcutEdge1() const { return _shortcutEdge1; }
 
-    void setShortcutEdge2(EdgeID shortcutEdge2) 
-    { 
+    void setShortcutEdge2(EdgeID shortcutEdge2)
+    {
         if (shortcutEdge2 < SHORTCUT_EDGE_LIMIT)
         {
             _shortcutEdge2 = shortcutEdge2;
@@ -802,11 +802,11 @@ public:
         }
     }
     EdgeID shortcutEdge2() const { return _shortcutEdge2; }
-    
+
     EdgeID shortcutEdgeLimit() const { return SHORTCUT_EDGE_LIMIT; }
 
-    void copyShortcutInfo(const EdgeCHExpand& e, bool reverse) 
-    { 
+    void copyShortcutInfo(const EdgeCHExpand& e, bool reverse)
+    {
         setShortcutMiddle(e.shortcutMiddle());
         if ( true || !reverse )
         {
@@ -819,10 +819,10 @@ public:
             _shortcutEdge2 = e.shortcutEdge1();
         }
         #ifdef COUNT_SHORTCUT_ORIGINAL_EDGES
-        _shortcutOriginalEdgeCount = e.shortcutOriginalEdgeCount();           
+        _shortcutOriginalEdgeCount = e.shortcutOriginalEdgeCount();
         #endif
     }
-    
+
     /** Serializes this edge to a given stream. */
     void serialize(ostream& out) const {
         // not tested
@@ -834,9 +834,9 @@ public:
         // not tested
         in.read((char*)this,sizeof(EdgeCHExpand)/sizeof(char));
     }
-    
-    
-    
+
+
+
 protected:
     // The colon behind the variable denotes the number of bytes
     // the variable uses in the main memory.
@@ -847,7 +847,7 @@ protected:
 
 // Here, we decide which edge to use.
 // Globally declaring the Edge class is unsatisfying and
-// legacy of Dominik Schultes code. 
+// legacy of Dominik Schultes code.
 #ifdef USE_CH_EXPAND
 typedef EdgeCHExpand Edge;
 #else
@@ -861,17 +861,17 @@ class CompleteEdge : public Edge
     /** Outputs data about the edge for debugging purposes. */
     friend std::ostream& operator<<( std::ostream& os, const CompleteEdge &edge ) {
         os << "(" << edge.source();
-        
+
         if (edge.isDirected(1)) os << "<";
         os << "-";
         if (edge.isDirected(0)) os << ">";
-        
+
         os << edge.target() << ", " << edge.weight() << ")";
         return os;
     }
-    
+
 public:
-    /** 
+    /**
      * Compares two edges first by source, in case of equality by target, and
      * in case of equality by weight.
      * If all these values are identical, returns true iff this edge is two-way
@@ -893,11 +893,11 @@ public:
 
     /** Constructor. */
     CompleteEdge() : Edge(), _source(0) {}
-    
+
     /** Constructor. */
-    CompleteEdge(NodeID s, NodeID t, EdgeWeight w, bool shortcut, bool forward, bool backward) : 
+    CompleteEdge(NodeID s, NodeID t, EdgeWeight w, bool shortcut, bool forward, bool backward) :
             Edge(t, w, shortcut, forward, backward), _source(s) {}
-    
+
     /** Constructor. */
     CompleteEdge(const Edge& e, NodeID s) : Edge(e), _source(s) {}
 
@@ -923,19 +923,19 @@ class SearchSpaceEdge
 public:
     SearchSpaceEdge()
     : _source(0), _target(0), _edgeID(0), _keyOfTarget(0), _searchLevel(0), _core(true) {}
-    
+
     SearchSpaceEdge(NodeID s, NodeID t, EdgeID e, EdgeWeight k, LevelID lev = 0, bool c = true)
     : _source(s), _target(t), _edgeID(e), _keyOfTarget(k), _searchLevel(lev), _core(c) {}
 
     void overwriteSearchLevel(LevelID lev) {_searchLevel = lev;}
-    
+
     NodeID source() const {return _source;}
     NodeID target() const {return _target;}
     EdgeID edgeID() const {return _edgeID;}
     EdgeWeight keyOfTarget() const {return _keyOfTarget;}
     LevelID searchLevel() const {return _searchLevel;}
     bool core() const {return _core;}
-    
+
 private:
     NodeID _source;
     NodeID _target;
