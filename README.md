@@ -9,12 +9,12 @@ Introduction
 ------------
 
 This program allows to create and test contraction hierarchies (CH), a
-hieararchical, shortcut-based speedup technique for fast and simple
+hierarchical, shortcut-based speedup technique for fast and simple
 routing in road networks. The code was created as part of a diploma
 thesis at Universitaet Karlsruhe (TH), Institute for Algorithmics II.
 
 Papers: - R. Geisberger, P. Sanders, D. Schultes, D. Delling.
-          Contraction Hierarchies: Faster and Simpler Hierarchical Routing 
+          Contraction Hierarchies: Faster and Simpler Hierarchical Routing
           in Road Networks. In 7th International Workshop on Efficient and
           Experimental Algorithms (WEA), 2008.
 
@@ -52,4 +52,3 @@ many-to-many shortest paths using highway hierarchies. In Workshop on
 Algorithm Engineering and Experiments (ALENEX), 2007.
 
 but using contraction hierarchies.
-
