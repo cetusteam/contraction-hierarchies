@@ -44,13 +44,19 @@ set(CHMAIN_SRC
     ${SUBDIR_INCLUDE_FILES}
 )
 
+
+# This program is capable to generate a graph required to run many2many
 add_executable(node-order ${CHMAIN_SRC})
-set_target_properties(node-order PROPERTIES COMPILE_FLAGS "-DCOUNT_SHORTCUT_ORIGINAL_EDGES")
+# We don't use the "-e" flag yet
+# set_target_properties(node-order PROPERTIES COMPILE_FLAGS "-DCOUNT_SHORTCUT_ORIGINAL_EDGES")
 target_link_libraries(node-order ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES})
 
-add_executable(contraction ${CHMAIN_SRC})
-set_target_properties(contraction PROPERTIES COMPILE_FLAGS "-DUSE_CH_EXPAND")
-target_link_libraries(contraction ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES})
+# Disabled for now because we don't generate paths, yet.
+# add_executable(contraction ${CHMAIN_SRC})
+# For many2many we don't need this parameter. However, it's required to
+# calculate the paths
+# set_target_properties(contraction PROPERTIES COMPILE_FLAGS "-DUSE_CH_EXPAND")
+# target_link_libraries(contraction ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES})
 
 
 add_subdirectory(many)

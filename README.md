@@ -24,15 +24,12 @@ Required libraries
 - STL
 - Boost IO-streams & regular expressions (only for input/output)
 
-Compilation
------------
+How to run
+----------
 
-    ./make
-
-Easy how to run
----------------
-
-    ./main -s -p -f input1.dsg -o output1-1.hcn -E output1-2.dsg -Z output1-3.sgr
+    cmake .
+    make
+    ./bin/node-order -s -p -f docu/example.ddsg -o output1-1.hcn -E output1-2.dsg -Z output1-3.sgr
     ./many/manyToMany output1-3.sgr 5 5 255
 
 
