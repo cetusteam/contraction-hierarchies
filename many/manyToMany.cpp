@@ -19,11 +19,10 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-using namespace std;
-
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+using namespace std;
 
 /**
  * Performing the bucket scans is a crucial part of the many-to-many computation.
@@ -59,7 +58,9 @@ inline NodeID mapNodeID(const MyGraph *const g, const NodeID u) {
 
 /** Returns a random node identifier between 0 and n-1. */
 inline NodeID randomNodeID(NodeID n) {
-    return (NodeID)(rand() / (double)(RAND_MAX+1.0) * n);
+    NodeID x = (NodeID)(rand() / (double)(RAND_MAX+1.0) * n);
+    cerr << "generated rand node_id:" << x << endl;
+    return x;
 }
 
 
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
              << "              4 = validate result;" << endl;
         exit(-1);
     }
+    srand(time(NULL));
 
     const string filenameGraph = argv[1];
 
@@ -98,12 +100,12 @@ int main(int argc, char *argv[])
         validateResult   = ((flags & 4) == 4);
     }
 
-    VERBOSE( cout << "read graph from '" << filenameGraph << "'" << endl
+    VERBOSE( cerr << "read graph from '" << filenameGraph << "'" << endl
                   << "generate " << noOfSources << " random source nodes and " << noOfTargets << " random target nodes" << endl );
-    VERBOSE( if (writeSourceNodes) cout << "write source nodes to cerr" << endl );
-    VERBOSE( if (writeMatrix)      cout << "write matrix to cerr" << endl );
-    VERBOSE( if (validateResult)   cout << "validate result" << endl );
-    VERBOSE( cout << endl );
+    VERBOSE( if (writeSourceNodes) cerr << "write source nodes to cerr" << endl );
+    VERBOSE( if (writeMatrix)      cerr << "write matrix to cerr" << endl );
+    VERBOSE( if (validateResult)   cerr << "validate result" << endl );
+    VERBOSE( cerr << endl );
 
 
     // read graph
@@ -114,7 +116,7 @@ int main(int argc, char *argv[])
     }
     MyGraph *const graph = new MyGraph(inGraph);
     inGraph.close();
-    VERBOSE( cout << "Graph read." << endl );
+    VERBOSE( cerr << "Graph read." << endl );
 
 
     // create many-to-many object
@@ -122,10 +124,13 @@ int main(int argc, char *argv[])
 
     // prepare input
     const NodeID noOfNodes = graph->noOfNodes();
+    
+    cerr << "Generating sources" << endl;
     vector<NodeID> sources;
     for (NodeID i = 0; i < noOfSources; i++) sources.push_back(mapNodeID(graph, randomNodeID(noOfNodes)));
 
     vector<NodeID> targets;
+    cerr << "Generating targets" << endl;
     for (NodeID i = 0; i < noOfTargets; i++) targets.push_back(mapNodeID(graph, randomNodeID(noOfNodes)));
 
     if (writeSourceNodes) {
@@ -146,7 +151,7 @@ int main(int argc, char *argv[])
 
         // check
         if (matrix == matrixRef) {
-            VERBOSE( cout << "Solution validated." << endl );
+            VERBOSE( cerr << "Solution validated." << endl );
         }
         else {
             cerr << "Wrong solution!" << endl;
@@ -154,7 +159,7 @@ int main(int argc, char *argv[])
     }
 
     if (writeMatrix) {
-        VERBOSE( cout << "write matrix" << endl );
+        VERBOSE( cerr << "write matrix" << endl );
         cerr << matrix;
     }
 

@@ -152,7 +152,7 @@ public:
         assert( sources.size() == result.noOfRows() );
         assert( targets.size() == result.noOfCols() );
 
-        VERBOSE( cout << "computing reference solution ..." << endl );
+        VERBOSE( cerr << "computing reference solution ..." << endl );
 
         VERBOSE( Percent progress(sources.size()) );
         for (NodeID u = 0; u < sources.size(); u++) {
@@ -166,7 +166,7 @@ public:
             }
         }
 
-        VERBOSE( cout << "done." << endl );
+        VERBOSE( cerr << "done." << endl );
     }
 
     /**
@@ -177,7 +177,7 @@ public:
         assert( sources.size() == result.noOfRows() );
         assert( targets.size() == result.noOfCols() );
 
-        VERBOSE( cout << "computing " << sources.size() << " x " << targets.size() << " table ..." << endl );
+        VERBOSE( cerr << "computing " << sources.size() << " x " << targets.size() << " table ..." << endl );
         COUNTING( counter.reset() );
         const double start = timestamp();
 
@@ -185,7 +185,7 @@ public:
         result.init(Weight::MAX_VALUE);
 
         // backward search
-        VERBOSE( cout << "backward search" << endl );
+        VERBOSE( cerr << "backward search" << endl );
         VERBOSE( Percent progress(targets.size()) );
         for (NodeID v = 0; v < targets.size(); v++) {
             VERBOSE( progress.printStatus(v) );
@@ -197,26 +197,26 @@ public:
         }
         double elapsedTime = timestamp() - start;
         LOG_TIME( if (! performBucketScans) cerr << elapsedTime << " " );
-        VERBOSE( cout << elapsedTime << " s" << endl );
-        COUNTING( cout << "backward search space: " << (long long)counter.count(COUNT_DEL_MIN, COUNT_TEMP) << endl );
+        VERBOSE( cerr << elapsedTime << " s" << endl );
+        COUNTING( cerr << "backward search space: " << (long long)counter.count(COUNT_DEL_MIN, COUNT_TEMP) << endl );
         COUNTING( counter.reset() );
 
-        VERBOSE( cout << "  search space sizes: int " << _searchSpacesBwDynInt.size()
+        VERBOSE( cerr << "  search space sizes: int " << _searchSpacesBwDynInt.size()
                       << " + short " << _searchSpacesBwDynShort.size() << endl );
 
         // only the 'int'-search space is used
         assert( _searchSpacesBwDynShort.size() == 0 );
 
         // sort and copy
-        VERBOSE( cout << "sort and copy" << endl );
+        VERBOSE( cerr << "sort and copy" << endl );
         _searchSpacesBwDynInt.sort(_g->noOfNodes());
         _searchSpacesBwInt = _searchSpacesBwDynInt;
         elapsedTime = timestamp() - start;
         LOG_TIME( if (! performBucketScans) cerr << elapsedTime << " " );
-        VERBOSE( cout << elapsedTime << " s" << endl );
+        VERBOSE( cerr << elapsedTime << " s" << endl );
 
         // forward search
-        VERBOSE( cout << "forward search" << endl );
+        VERBOSE( cerr << "forward search" << endl );
         VERBOSE( progress.reinit(sources.size()) );
         COUNTING( unsigned long long bucketScans = 0 );
 	    //COUNTING( unsigned long long bucketScansTop = 0 );
@@ -246,10 +246,10 @@ public:
         elapsedTime = timestamp() - start;
         LOG_TIME( cerr << elapsedTime << " " );
         LOG_TIME( if (performBucketScans) cerr << endl );
-        VERBOSE( cout << elapsedTime << " s" << endl );
-        COUNTING( cout << "forward search space: " << (long long)counter.count(COUNT_DEL_MIN, COUNT_TEMP) << endl );
-        COUNTING( cout << "bucket scans (all): " << bucketScans << endl );
-	    //COUNTING( cout << "bucket scans (top): " << bucketScansTop << endl );
+        VERBOSE( cerr << elapsedTime << " s" << endl );
+        COUNTING( cerr << "forward search space: " << (long long)counter.count(COUNT_DEL_MIN, COUNT_TEMP) << endl );
+        COUNTING( cerr << "bucket scans (all): " << bucketScans << endl );
+	    //COUNTING( cerr << "bucket scans (top): " << bucketScansTop << endl );
     }
 
 private:

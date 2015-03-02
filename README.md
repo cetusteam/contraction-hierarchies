@@ -27,7 +27,14 @@ Required libraries
 Compilation
 -----------
 
-./make
+    ./make
+
+Easy how to run
+---------------
+
+    ./main -s -p -f input1.dsg -o output1-1.hcn -E output1-2.dsg -Z output1-3.sgr
+    ./many/manyToMany output1-3.sgr 5 5 255
+
 
 Sources of documentation
 ------------------------

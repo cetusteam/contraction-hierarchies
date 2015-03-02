@@ -271,6 +271,7 @@ private:
     };
 
 
+public:
     // note: we have two instances of each type of search space, one based on 'int's and
     //       one based on 'short's. Whenever possible we store an entry in the 'short' version;
     //       if the values of an entry are too big, we store it in the 'int' version.
