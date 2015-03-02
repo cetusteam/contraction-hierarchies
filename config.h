@@ -44,9 +44,9 @@
 
 // on, store expand information, off do not
 // required if paths found by query algorithm
-// should be expanded to pahts in the original graph
+// should be expanded to paths in the original graph
 // Note: affects the output of a sgr-file
-#define USE_CH_EXPAND
+// #define USE_CH_EXPAND
 
 #ifdef USE_CH_EXPAND
 #define CH_EXPAND(x) x
@@ -59,7 +59,7 @@
 // This adds another 4 bytes to one edge, should be disabled for
 // queries.
 // Note: affects the output of a sgr-file
-#define COUNT_SHORTCUT_ORIGINAL_EDGES
+// #define COUNT_SHORTCUT_ORIGINAL_EDGES
 
 // activate counting of cache misses
 //#define PAPI
