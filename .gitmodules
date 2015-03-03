@@ -1,0 +1,3 @@
+[submodule "protos/ch"]
+	path = protos/ch
+	url = git@bitbucket.org:cetus/protos-ch.git
