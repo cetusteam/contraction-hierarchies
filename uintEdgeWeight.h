@@ -24,7 +24,7 @@
 
 #include <limits>
 
-typedef unsigned int EdgeWeight;
+typedef uint32_t EdgeWeight;
 typedef int SignedEdgeWeight;
 
 

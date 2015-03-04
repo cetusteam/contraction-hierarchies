@@ -28,7 +28,7 @@
  * Represents a matrix that can store a result of
  * a many-to-many computation.
  */
-template <typename value_type, typename size_type = unsigned int>
+template <typename value_type, typename size_type = uint32_t>
 class Matrix
 {
     friend ostream& operator<<( ostream& os, const Matrix& matrix ) {
@@ -226,18 +226,19 @@ public:
             _dFW.obtainRelevantSearchSpace(*this);
             _dFW.clear();
 
-            if (performBucketScans) {
-                const NodeID matrixIndexOffset = result.index(u, 0);
-                for (NodeID i = 0; i < _searchSpaceFW.size(); i++) {
-                    const NodeID via = _searchSpaceFW[i].target();
-                    const EdgeWeight distFW = _searchSpaceFW[i].weight();
+            if (!performBucketScans) {
+                continue;
+            }
+            const NodeID matrixIndexOffset = result.index(u, 0);
+            for (NodeID i = 0; i < _searchSpaceFW.size(); i++) {
+                const NodeID via = _searchSpaceFW[i].target();
+                const EdgeWeight distFW = _searchSpaceFW[i].weight();
 
-                    const ISSInt::const_iterator endInt = _searchSpacesBwInt.end(via);
-                    for (ISSInt::const_iterator it = _searchSpacesBwInt.begin(via); it != endInt; it++) {
-                        result.improve(matrixIndexOffset + it->origin(), distFW + it->dist());
-                        COUNTING( bucketScans++ );
-			            //COUNTING( if (_g->node(via).level() >= _earlyStopLevel) bucketScansTop++ );
-                    }
+                const ISSInt::const_iterator endInt = _searchSpacesBwInt.end(via);
+                for (ISSInt::const_iterator it = _searchSpacesBwInt.begin(via); it != endInt; it++) {
+                    result.improve(matrixIndexOffset + it->origin(), distFW + it->dist());
+                    COUNTING( bucketScans++ );
+                    //COUNTING( if (_g->node(via).level() >= _earlyStopLevel) bucketScansTop++ );
                 }
             }
 

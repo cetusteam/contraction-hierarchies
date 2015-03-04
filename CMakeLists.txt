@@ -42,6 +42,7 @@ target_link_libraries(node-order
     ${Boost_LIBRARIES}
     ${PROTOBUF_LIBRARIES}
 )
+set_property(TARGET node-order PROPERTY CXX_STANDARD 11)
 
 # Disabled for now because we don't generate paths, yet.
 # add_executable(contraction ${CHMAIN_SRC})

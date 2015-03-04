@@ -22,7 +22,14 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+
 using namespace std;
+using namespace google::protobuf::io;
 
 /**
  * Performing the bucket scans is a crucial part of the many-to-many computation.
@@ -44,23 +51,42 @@ typedef datastr::graph::SearchGraph TransitGraph;
 //#include "../stats/log.h"
 #include "../processing/DijkstraCH.h"
 #include "manyToMany.h"
-
-
+#include "protos/ch/many2many.pb.h"
 
 typedef datastr::graph::SearchGraph MyGraph;
 typedef DijkstraCHManyToManyFW DijkstraManyToManyFW;
 typedef DijkstraCHManyToManyBW DijkstraManyToManyBW;
-inline NodeID mapNodeID(const MyGraph *const g, const NodeID u) {
-    // map the actual node ID to the node ID that is used internally by highway-node routing
-    return g->mapExtToIntNodeID(u);
+
+static void readNodes(const MyGraph *const g, const google::protobuf::RepeatedField<uint32_t>& in, vector<NodeID>& vs) {
+    vs.resize(in.size());
+    for (auto i=0; i < in.size(); i++) {
+        // map the actual node ID to the node ID that is used internally by
+        // highway-node routing
+        vs[i] = g->mapExtToIntNodeID(in.Get(i));
+    }
 }
 
+static void readMessage(const string& filename, ::google::protobuf::Message& message) {
+    int fd = open(filename.c_str(), O_RDONLY);
+    FileInputStream raw_input(fd);
+    raw_input.SetCloseOnDelete(true);
+    message.ParseFromZeroCopyStream(&raw_input);
+}
 
-/** Returns a random node identifier between 0 and n-1. */
-inline NodeID randomNodeID(NodeID n) {
-    NodeID x = (NodeID)(rand() / (double)(RAND_MAX+1.0) * n);
-    cerr << "generated rand node_id:" << x << endl;
-    return x;
+static void writeMessage(const string& filename, ::google::protobuf::Message& message) {
+    int fd = open(filename.c_str(), O_WRONLY);
+    FileOutputStream raw_output(fd);
+    raw_output.SetCloseOnDelete(true);
+    message.SerializeToZeroCopyStream(&raw_output);
+}
+
+MyGraph *const readGraph(const string& inGraphFn) {
+    ifstream inGraph(inGraphFn, ios::binary);
+    if (!inGraph) {
+        cerr << "Input file '" << inGraphFn << "' couldn't be opened." << endl;
+        exit(-1);
+    }
+    return new MyGraph(inGraph);
 }
 
 
@@ -70,90 +96,70 @@ int main(int argc, char *argv[])
     // read arguments
     if (argc < 2) {
         cerr << "Too few arguments!" << endl
-             << "Usage: ./manyToMany <filenameGraph> [<noOfSources>] [<noOfTargets>] [<flags>]" << endl
-             << "       noOfSources: default = 1000" << endl
-             << "       noOfTargets: default = 1000" << endl
-             << "       flags: 1 = write source node IDs to cerr;" << endl
-             << "              2 = write matrix to cerr;" << endl
-             << "              4 = validate result;" << endl;
+             << "Usage: ./manyToMany <inSgrGraph> <inNodes> <outMatrix>" << endl;
         exit(-1);
     }
-    srand(time(NULL));
 
-    const string filenameGraph = argv[1];
+    const string inGraphFn   = argv[1];
+    const string inNodesFn   = argv[2];
+    const string outMatrixFn = argv[3];
 
-    NodeID noOfSources = 1000;
-    if (argc >= 3) noOfSources = atoi(argv[2]);
+    const bool writeSourceNodes = false;
+    const bool writeMatrix = false;
+    const bool validateResult = false;
 
-    NodeID noOfTargets = 1000;
-    if (argc >= 4) noOfTargets = atoi(argv[3]);
-
-    LevelID earlyStopLevel = 10;
-
-    bool writeSourceNodes = false;
-    bool writeMatrix = false;
-    bool validateResult = false;
-    if (argc >= 5) {
-        const int flags = atoi(argv[4]);
-        writeSourceNodes = ((flags & 1) == 1);
-        writeMatrix      = ((flags & 2) == 2);
-        validateResult   = ((flags & 4) == 4);
-    }
-
-    VERBOSE( cerr << "read graph from '" << filenameGraph << "'" << endl
-                  << "generate " << noOfSources << " random source nodes and " << noOfTargets << " random target nodes" << endl );
+    VERBOSE( cerr << "read graph from '" << inGraphFn << "'" << endl);
+    VERBOSE( cerr << "read nodes from '" << inNodesFn << "'" << endl);
+    VERBOSE( cerr << "write matrix to '" << outMatrixFn << "'" << endl);
     VERBOSE( if (writeSourceNodes) cerr << "write source nodes to cerr" << endl );
     VERBOSE( if (writeMatrix)      cerr << "write matrix to cerr" << endl );
     VERBOSE( if (validateResult)   cerr << "validate result" << endl );
-    VERBOSE( cerr << endl );
 
+    uint32_t sz_sources, sz_targets;
+    cin >> sz_sources >> sz_targets;
 
     // read graph
-    ifstream inGraph( filenameGraph.c_str(), ios::binary );
-    if (! inGraph) {
-        cerr << "Input file '" << filenameGraph << "' not found." << endl;
-        exit(-1);
-    }
-    MyGraph *const graph = new MyGraph(inGraph);
-    inGraph.close();
+    MyGraph *const graph = readGraph(inGraphFn);
+
     VERBOSE( cerr << "Graph read." << endl );
 
+    // read the input
+    ch::protos::Nodes nodes;
+    readMessage(inNodesFn, nodes);
 
-    // create many-to-many object
-    ManyToMany<MyGraph, DijkstraManyToManyFW, DijkstraManyToManyBW, performBucketScans> mtm(graph, earlyStopLevel);
-
-    // prepare input
-    const NodeID noOfNodes = graph->noOfNodes();
-    
-    cerr << "Generating sources" << endl;
     vector<NodeID> sources;
-    for (NodeID i = 0; i < noOfSources; i++) sources.push_back(mapNodeID(graph, randomNodeID(noOfNodes)));
+    readNodes(graph, nodes.sources(), sources);
 
     vector<NodeID> targets;
-    cerr << "Generating targets" << endl;
-    for (NodeID i = 0; i < noOfTargets; i++) targets.push_back(mapNodeID(graph, randomNodeID(noOfNodes)));
+    readNodes(graph, nodes.targets(), targets);
 
-    if (writeSourceNodes) {
-        for (NodeID i = 0; i < noOfSources; i++) {
-            if (i > 0) cerr << endl;
-            cerr << sources[i];
-        }
-    }
+    // create many-to-many object
+    LevelID earlyStopLevel = 10;
+    ManyToMany<MyGraph, DijkstraManyToManyFW, DijkstraManyToManyBW, performBucketScans> mtm(graph, earlyStopLevel);
 
     // compute matrix
-    Matrix<EdgeWeight> matrix(noOfSources, noOfTargets);
+    Matrix<EdgeWeight> matrix(sources.size(), targets.size());
     mtm.computeMatrix( sources, targets, matrix );
+
+    // generate and write output
+    ch::protos::Matrix outMatrix;
+    for (int i=0; i < sources.size(); i++) {
+        ch::protos::Row* row = outMatrix.add_rows();
+        for (int j=0; j < targets.size(); j++) {
+            row->add_data(matrix.value(i, j));
+        }
+    }
+    writeMessage(outMatrixFn, outMatrix);
 
     if (validateResult) {
         // compute reference solution
-        Matrix<EdgeWeight> matrixRef(noOfSources, noOfTargets);
-        mtm.computeMatrixNaive( sources, targets, matrixRef );
+        Matrix<EdgeWeight> matrixRef(sources.size(), targets.size());
+        mtm.computeMatrixNaive( sources, targets, matrixRef);
 
         // check
         if (matrix == matrixRef) {
             VERBOSE( cerr << "Solution validated." << endl );
-        }
-        else {
+        } else {
             cerr << "Wrong solution!" << endl;
         }
     }
