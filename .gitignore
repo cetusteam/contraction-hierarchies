@@ -1,10 +1,1 @@
-/bin
-many/manyToMany
-Makefile
-CMakeFiles/
-CMakeScripts/
-*.xcodeproj/
-*.build/
-*.a
-CMakeCache.txt
-cmake_install.cmake
+/build

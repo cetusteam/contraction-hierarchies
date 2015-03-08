@@ -6,10 +6,6 @@ find_package(Protobuf)
 
 add_subdirectory(protos/ch)
 
-# create bin
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
-set (GENERATED_DIR ${CMAKE_SOURCE_DIR}/generated)
-
 file(GLOB_RECURSE INCLUDE_FILES
     stats/*.h
     command/*.h
@@ -33,6 +29,8 @@ set(CHMAIN_SRC
     ${INCLUDE_FILES}
 )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 # This program is capable to generate a graph required to run many2many
 add_executable(node-order ${CHMAIN_SRC})
 # We don't use the "-e" flag yet
@@ -42,7 +40,6 @@ target_link_libraries(node-order
     ${Boost_LIBRARIES}
     ${PROTOBUF_LIBRARIES}
 )
-set_property(TARGET node-order PROPERTY CXX_STANDARD 11)
 
 # Disabled for now because we don't generate paths, yet.
 # add_executable(contraction ${CHMAIN_SRC})

@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007, 2008 
+/* Copyright (C) 2005, 2006, 2007, 2008
  * Robert Geisberger, Dominik Schultes, Peter Sanders,
  * Universitaet Karlsruhe (TH)
  *
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     VERBOSE( cerr << "Graph read." << endl );
 
     // read the input
-    ch::protos::Nodes nodes;
+    protos::ch::Nodes nodes;
     readMessage(inNodesFn, nodes);
 
     vector<NodeID> sources;
@@ -142,9 +142,9 @@ int main(int argc, char *argv[])
     mtm.computeMatrix( sources, targets, matrix );
 
     // generate and write output
-    ch::protos::Matrix outMatrix;
+    protos::ch::Matrix outMatrix;
     for (int i=0; i < sources.size(); i++) {
-        ch::protos::Row* row = outMatrix.add_rows();
+        protos::ch::Row* row = outMatrix.add_rows();
         for (int j=0; j < targets.size(); j++) {
             row->add_data(matrix.value(i, j));
         }

@@ -24,11 +24,16 @@ Required libraries
 - STL
 - Boost IO-streams & regular expressions (only for input/output)
 
-How to run
-----------
+How to build & run
+------------------
 
-    cmake .
+    git submodule init
+    git submodule update
+    mkdir build
+    cd build
+    cmake ..   ## or cmake -G Xcode ..
     make
+    cd ..
     ./bin/node-order -s -p -f docu/example.ddsg -o output1-1.hcn -E output1-2.dsg -Z output1-3.sgr
     ./many/manyToMany output1-3.sgr 5 5 255
 
