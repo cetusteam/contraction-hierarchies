@@ -29,13 +29,21 @@ How to build & run
 
     git submodule init
     git submodule update
+    ./make-release.txt
+    ./run-node-order.sh docu/example.ddsg
+    ./run-contraction.sh docu/example.ddsg
+
+To clean the temporary generated files:
+
+    ./clean.sh docu/example.ddsg
+
+You can create a development project in Xcode:
+
     mkdir build
     cd build
-    cmake ..   ## or cmake -G Xcode ..
-    make
+    cmake -G Xcode ..
     cd ..
-    ./bin/node-order -s -p -f docu/example.ddsg -o output1-1.hcn -E output1-2.dsg -Z output1-3.sgr
-    ./many/manyToMany output1-3.sgr 5 5 255
+    open contraction-hierarchies.xcodeproj
 
 
 Sources of documentation

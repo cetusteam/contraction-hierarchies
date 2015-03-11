@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, 2006, 2007, 2008 
+/* Copyright (C) 2005, 2006, 2007, 2008
  * Robert Geisberger, Dominik Schultes, Peter Sanders,
  * Universitaet Karlsruhe (TH)
  *
@@ -21,9 +21,6 @@
 
 #ifndef CONFIG_H
 #define CONFIG_H
-
-// switch asserts on/off
-#define NDEBUG
 
 #include <cassert>
 
