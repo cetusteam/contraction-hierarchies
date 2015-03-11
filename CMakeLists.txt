@@ -34,7 +34,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # This program is capable to generate a graph required to run many2many
 add_executable(node-order ${CHMAIN_SRC})
 # We don't use the "-e" flag yet
-# set_target_properties(node-order PROPERTIES COMPILE_FLAGS "-DCOUNT_SHORTCUT_ORIGINAL_EDGES")
+set_target_properties(node-order PROPERTIES COMPILE_FLAGS "-DCOUNT_SHORTCUT_ORIGINAL_EDGES=1")
 target_link_libraries(node-order
     protos-ch
     ${Boost_LIBRARIES}
@@ -42,10 +42,10 @@ target_link_libraries(node-order
 )
 
 # Disabled for now because we don't generate paths, yet.
-# add_executable(contraction ${CHMAIN_SRC})
+add_executable(contraction ${CHMAIN_SRC})
 # For many2many we don't need this parameter. However, it's required to
 # calculate the paths
-# set_target_properties(contraction PROPERTIES COMPILE_FLAGS "-DUSE_CH_EXPAND")
-# target_link_libraries(contraction ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES})
+set_target_properties(contraction PROPERTIES COMPILE_FLAGS "-DUSE_CH_EXPAND")
+target_link_libraries(contraction ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES})
 
 add_subdirectory(many)
