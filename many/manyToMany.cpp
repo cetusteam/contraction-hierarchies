@@ -24,6 +24,7 @@
 #include <fstream>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -68,16 +69,14 @@ static void readNodes(const MyGraph *const g, const google::protobuf::RepeatedFi
 
 static void readMessage(const string& filename, ::google::protobuf::Message& message) {
     int fd = open(filename.c_str(), O_RDONLY);
-    FileInputStream raw_input(fd);
-    raw_input.SetCloseOnDelete(true);
-    message.ParseFromZeroCopyStream(&raw_input);
+    message.ParseFromFileDescriptor(fd);
+    close(fd);
 }
 
 static void writeMessage(const string& filename, ::google::protobuf::Message& message) {
-    int fd = open(filename.c_str(), O_WRONLY);
-    FileOutputStream raw_output(fd);
-    raw_output.SetCloseOnDelete(true);
-    message.SerializeToZeroCopyStream(&raw_output);
+    int fd = creat(filename.c_str(), 0644);
+    message.SerializeToFileDescriptor(fd);
+    close(fd);
 }
 
 MyGraph *const readGraph(const string& inGraphFn) {
@@ -114,9 +113,6 @@ int main(int argc, char *argv[])
     VERBOSE( if (writeSourceNodes) cerr << "write source nodes to cerr" << endl );
     VERBOSE( if (writeMatrix)      cerr << "write matrix to cerr" << endl );
     VERBOSE( if (validateResult)   cerr << "validate result" << endl );
-
-    uint32_t sz_sources, sz_targets;
-    cin >> sz_sources >> sz_targets;
 
     // read graph
     MyGraph *const graph = readGraph(inGraphFn);
