@@ -38,6 +38,7 @@ using namespace google::protobuf::io;
  * without accounting for the bucket scans.
  */
 const bool performBucketScans = true;
+#define SCALE 1
 
 
 #include "../config.h"
@@ -53,29 +54,30 @@ typedef datastr::graph::SearchGraph TransitGraph;
 #include "../processing/DijkstraCH.h"
 #include "manyToMany.h"
 #include "protos/ch/many2many.pb.h"
+#include "options_parser.h"
 
 typedef datastr::graph::SearchGraph MyGraph;
 typedef DijkstraCHManyToManyFW DijkstraManyToManyFW;
 typedef DijkstraCHManyToManyBW DijkstraManyToManyBW;
 
-static void readNodes(const MyGraph *const g, const google::protobuf::RepeatedField<uint32_t>& in, vector<NodeID>& vs) {
-    vs.resize(in.size());
+static void readNodes(const MyGraph *const g, const google::protobuf::RepeatedField<uint32_t>& in, vector<NodeID>* vs) {
+    vs->resize(in.size());
     for (auto i=0; i < in.size(); i++) {
         // map the actual node ID to the node ID that is used internally by
         // highway-node routing
-        vs[i] = g->mapExtToIntNodeID(in.Get(i));
+        (*vs)[i] = g->mapExtToIntNodeID(in.Get(i));
     }
 }
 
-static void readMessage(const string& filename, ::google::protobuf::Message& message) {
+static void readMessage(const string& filename, ::google::protobuf::Message* message) {
     int fd = open(filename.c_str(), O_RDONLY);
-    message.ParseFromFileDescriptor(fd);
+    message->ParseFromFileDescriptor(fd);
     close(fd);
 }
 
-static void writeMessage(const string& filename, ::google::protobuf::Message& message) {
-    int fd = creat(filename.c_str(), 0644);
-    message.SerializeToFileDescriptor(fd);
+static void writeMessage(const string& filename, ::google::protobuf::Message* message) {
+    int fd = open(filename.c_str(), O_WRONLY);
+    message->SerializeToFileDescriptor(fd);
     close(fd);
 }
 
@@ -88,46 +90,70 @@ MyGraph *const readGraph(const string& inGraphFn) {
     return new MyGraph(inGraph);
 }
 
+class many2many_opts : public options_parser_t {
+public:
+
+    string input_fn;
+    string nodes_fn;
+    string matrix_fn;
+
+    many2many_opts() : options_parser_t("i:n:o:") {}
+    void parse() override {
+        // input params
+        set_option('i', &input_fn);
+        set_option('n', &nodes_fn);
+
+        // output params
+        set_option('o', &matrix_fn);
+    }
+    void
+    run_checks() override {
+        check_not_empty(input_fn, "input file not provided (-i)");
+        check_not_empty(nodes_fn, "input nodes not provided (-n)");
+        check_not_empty(matrix_fn, "output matrix file name not provided (-o)");
+    }
+
+    void
+    usage(const char *p) override {
+        cerr << "usage: " << p << " -i graph.sgr -n many2many-nodes.pb -o matrix.pb" << endl;
+    }
+};
+
 
 /** The main program. */
 int main(int argc, char *argv[])
 {
-    // read arguments
-    if (argc < 2) {
-        cerr << "Too few arguments!" << endl
-             << "Usage: ./manyToMany <inSgrGraph> <inNodes> <outMatrix>" << endl;
-        exit(-1);
-    }
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    const string inGraphFn   = argv[1];
-    const string inNodesFn   = argv[2];
-    const string outMatrixFn = argv[3];
+    many2many_opts opts;
+    opts.parse_options(argc, argv);
+
 
     const bool writeSourceNodes = false;
     const bool writeMatrix = false;
     const bool validateResult = false;
 
-    VERBOSE( cerr << "read graph from '" << inGraphFn << "'" << endl);
-    VERBOSE( cerr << "read nodes from '" << inNodesFn << "'" << endl);
-    VERBOSE( cerr << "write matrix to '" << outMatrixFn << "'" << endl);
+    VERBOSE( cerr << "read graph from '" << opts.input_fn << "'" << endl);
+    VERBOSE( cerr << "read nodes from '" << opts.nodes_fn << "'" << endl);
+    VERBOSE( cerr << "write matrix to '" << opts.matrix_fn << "'" << endl);
     VERBOSE( if (writeSourceNodes) cerr << "write source nodes to cerr" << endl );
     VERBOSE( if (writeMatrix)      cerr << "write matrix to cerr" << endl );
     VERBOSE( if (validateResult)   cerr << "validate result" << endl );
 
     // read graph
-    MyGraph *const graph = readGraph(inGraphFn);
+    MyGraph *const graph = readGraph(opts.input_fn);
 
     VERBOSE( cerr << "Graph read." << endl );
 
     // read the input
     protos::ch::Nodes nodes;
-    readMessage(inNodesFn, nodes);
+    readMessage(opts.nodes_fn, &nodes);
 
     vector<NodeID> sources;
-    readNodes(graph, nodes.sources(), sources);
+    readNodes(graph, nodes.sources(), &sources);
 
     vector<NodeID> targets;
-    readNodes(graph, nodes.targets(), targets);
+    readNodes(graph, nodes.targets(), &targets);
 
     // create many-to-many object
     LevelID earlyStopLevel = 10;
@@ -139,13 +165,14 @@ int main(int argc, char *argv[])
 
     // generate and write output
     protos::ch::Matrix outMatrix;
+    outMatrix.set_scale(SCALE);
     for (int i=0; i < sources.size(); i++) {
         protos::ch::Row* row = outMatrix.add_rows();
         for (int j=0; j < targets.size(); j++) {
-            row->add_data(matrix.value(i, j));
+            row->add_data(SCALE * matrix.value(i, j));
         }
     }
-    writeMessage(outMatrixFn, outMatrix);
+    writeMessage(opts.matrix_fn, &outMatrix);
 
     if (validateResult) {
         // compute reference solution
