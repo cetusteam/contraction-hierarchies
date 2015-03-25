@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
 
     // generate and write output
     protos::ch::Matrix outMatrix;
+    outMatrix.set_scale(1);
     for (int i=0; i < sources.size(); i++) {
         protos::ch::Row* row = outMatrix.add_rows();
         for (int j=0; j < targets.size(); j++) {
