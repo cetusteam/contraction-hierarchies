@@ -29,7 +29,7 @@ How to build & run
 
     git submodule init
     git submodule update
-    ./make-release.txt
+    ./make-release.sh
     ./run-node-order.sh docu/example.ddsg
     ./run-contraction.sh docu/example.ddsg
 
